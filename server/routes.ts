@@ -1,6 +1,28 @@
 import type { Express, Request, Response } from "express";
+import { createServer, type Server } from "http";
 
-// Health check endpoint for Docker
+// ✅ IMPORTACIONES DE BASE DE DATOS - TODAS JUNTAS
+import { db } from "./db";
+import { companies, locations, users, printers, printJobs } from "@shared/schema";
+import { eq, and, desc, sql } from "drizzle-orm";
+
+// ✅ OTRAS IMPORTACIONES
+import { storage } from "./storage";
+import { 
+  apiKeyHeaderSchema, 
+  printJobRequestSchema,
+  simplePrintJobRequestSchema,
+  numericPrinterJobRequestSchema,
+  insertUserSchema, 
+  insertPrinterSchema
+} from "@shared/schema";
+import { ZodError } from "zod";
+import { fromZodError } from "zod-validation-error";
+import { printProcessor } from "./print-processor";
+import type { Server as SocketIOServer } from "socket.io";
+import { getActiveUsersCount, getActiveUsers } from './websocket.js';
+
+// ✅ FUNCIONES HELPER (DESPUÉS DE TODAS LAS IMPORTACIONES)
 function setupHealthCheck(app: Express) {
   app.get('/api/health', (_req, res) => {
     res.status(200).json({ 
@@ -10,22 +32,6 @@ function setupHealthCheck(app: Express) {
     });
   });
 }
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { 
-  apiKeyHeaderSchema, 
-  printJobRequestSchema,
-  simplePrintJobRequestSchema,
-  numericPrinterJobRequestSchema,
-  insertUserSchema, 
-  insertPrinterSchema,
-  companies, locations 
-} from "@shared/schema";
-import { ZodError } from "zod";
-import { fromZodError } from "zod-validation-error";
-import { printProcessor } from "./print-processor";
-import type { Server as SocketIOServer } from "socket.io";
-import { getActiveUsersCount, getActiveUsers } from './websocket.js';
 
 // Variable global para el socket server
 let socketServer: SocketIOServer | null = null;

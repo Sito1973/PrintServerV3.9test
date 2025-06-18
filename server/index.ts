@@ -9,6 +9,7 @@ import fs from "fs";
 import { printProcessor } from "./print-processor";
 import { Server as SocketIOServer } from "socket.io";
 import { createServer, type Server } from "http";
+import cors from 'cors';
 
 function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -22,6 +23,32 @@ function log(message: string, source = "express") {
 }
 
 const app = express();
+app.use(cors({
+  origin: true, // Permitir todos los orígenes en desarrollo
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// ✅ CONFIGURAR MIDDLEWARE DE PARSING
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false }));
+
+// ✅ ASEGURAR HEADERS CORRECTOS PARA API
+app.use('/api', (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // Manejar preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  next();
+});
 const port = parseInt(process.env.PORT || "5000");
 
 // Read NODE_ENV directly in this file

@@ -1,47 +1,34 @@
-// client/src/components/AppContext.tsx - VERSIÓN EXTENDIDA CON EMPRESAS Y SEDES
+// client/src/components/AppContext.tsx - VERSIÓN LIMPIA SIN EMPRESAS/SEDES
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import qzTray from '@/lib/qz-tray';
 
-// Tipos para empresas y sedes
-export interface Sede {
-  id: string;
-  name: string;
-}
-
-export interface Empresa {
-  id: string;
-  name: string;
-  sedes: Sede[];
-}
-
+// Configuraciones generales de la aplicación (SIN empresas/sedes)
 interface AppSettings {
   companyName: string;
   adminEmail: string;
   enableNotifications: boolean;
-  // Nueva configuración de empresas y sedes
-  empresas: Empresa[];
+  // Otras configuraciones que NO sean empresas/sedes
+  theme: 'light' | 'dark' | 'system';
+  language: 'es' | 'en';
+  autoConnectQzTray: boolean;
 }
 
 interface AppContextType {
+  // Estados de autenticación y QZ Tray
   isAuthenticated: boolean;
   qzTrayConnected: boolean;
   availablePrinters: string[];
+
+  // Funciones QZ Tray
   initializeQzTray: () => Promise<boolean>;
   refreshPrinters: () => Promise<void>;
+
+  // Configuraciones generales
   settings: AppSettings;
   updateSettings: (newSettings: Partial<AppSettings>) => void;
-  // Nuevas funciones para gestión de empresas y sedes
-  addEmpresa: (empresa: Omit<Empresa, 'id'>) => void;
-  updateEmpresa: (empresaId: string, empresa: Partial<Empresa>) => void;
-  removeEmpresa: (empresaId: string) => void;
-  addSede: (empresaId: string, sede: Omit<Sede, 'id'>) => void;
-  updateSede: (empresaId: string, sedeId: string, sede: Partial<Sede>) => void;
-  removeSede: (empresaId: string, sedeId: string) => void;
-  getSedesByEmpresa: (empresaId: string) => Sede[];
-  getAllEmpresas: () => Empresa[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -52,192 +39,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [qzTrayConnected, setQzTrayConnected] = useState(false);
   const [availablePrinters, setAvailablePrinters] = useState<string[]>([]);
 
-  // Estado de configuraciones con valores por defecto que incluyen ejemplos
+  // Estado de configuraciones generales (SIN empresas/sedes)
   const [settings, setSettings] = useState<AppSettings>({
     companyName: 'PrinterHub',
     adminEmail: '',
     enableNotifications: false,
-    empresas: [
-      {
-        id: '1',
-        name: 'Sede Principal',
-        sedes: [
-          { id: '1-1', name: 'Piso 1 - Administración' },
-          { id: '1-2', name: 'Piso 2 - Contabilidad' },
-          { id: '1-3', name: 'Piso 3 - Gerencia' }
-        ]
-      },
-      {
-        id: '2', 
-        name: 'Sucursal Norte',
-        sedes: [
-          { id: '2-1', name: 'Área Comercial' },
-          { id: '2-2', name: 'Área Técnica' }
-        ]
-      }
-    ],
+    theme: 'system',
+    language: 'es',
+    autoConnectQzTray: true,
   });
 
-  // Función para generar IDs únicos
-  const generateId = () => {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  };
-
-  // Función para actualizar configuraciones
+  // Función para actualizar configuraciones generales
   const updateSettings = (newSettings: Partial<AppSettings>) => {
     const updatedSettings = { ...settings, ...newSettings };
     setSettings(updatedSettings);
-    // Guardar en localStorage para persistencia
-    localStorage.setItem('app_settings', JSON.stringify(updatedSettings));
-  };
 
-  // Funciones para gestión de empresas
-  const addEmpresa = (empresa: Omit<Empresa, 'id'>) => {
-    const newEmpresa: Empresa = {
-      ...empresa,
-      id: generateId(),
-      sedes: empresa.sedes || []
-    };
-
-    const updatedSettings = {
-      ...settings,
-      empresas: [...settings.empresas, newEmpresa]
-    };
-
-    setSettings(updatedSettings);
-    localStorage.setItem('app_settings', JSON.stringify(updatedSettings));
+    // Guardar solo configuraciones generales en localStorage
+    localStorage.setItem('app_general_settings', JSON.stringify(updatedSettings));
 
     toast({
-      title: "Empresa agregada",
-      description: `La empresa "${empresa.name}" ha sido agregada exitosamente.`,
+      title: "Configuración actualizada",
+      description: "Los cambios han sido guardados exitosamente.",
     });
-  };
-
-  const updateEmpresa = (empresaId: string, empresaData: Partial<Empresa>) => {
-    const updatedSettings = {
-      ...settings,
-      empresas: settings.empresas.map(empresa => 
-        empresa.id === empresaId 
-          ? { ...empresa, ...empresaData }
-          : empresa
-      )
-    };
-
-    setSettings(updatedSettings);
-    localStorage.setItem('app_settings', JSON.stringify(updatedSettings));
-
-    toast({
-      title: "Empresa actualizada",
-      description: "Los datos de la empresa han sido actualizados exitosamente.",
-    });
-  };
-
-  const removeEmpresa = (empresaId: string) => {
-    const empresa = settings.empresas.find(e => e.id === empresaId);
-
-    const updatedSettings = {
-      ...settings,
-      empresas: settings.empresas.filter(empresa => empresa.id !== empresaId)
-    };
-
-    setSettings(updatedSettings);
-    localStorage.setItem('app_settings', JSON.stringify(updatedSettings));
-
-    toast({
-      title: "Empresa eliminada",
-      description: `La empresa "${empresa?.name}" ha sido eliminada exitosamente.`,
-      variant: "destructive"
-    });
-  };
-
-  // Funciones para gestión de sedes
-  const addSede = (empresaId: string, sede: Omit<Sede, 'id'>) => {
-    const newSede: Sede = {
-      ...sede,
-      id: generateId()
-    };
-
-    const updatedSettings = {
-      ...settings,
-      empresas: settings.empresas.map(empresa => 
-        empresa.id === empresaId 
-          ? { ...empresa, sedes: [...empresa.sedes, newSede] }
-          : empresa
-      )
-    };
-
-    setSettings(updatedSettings);
-    localStorage.setItem('app_settings', JSON.stringify(updatedSettings));
-
-    toast({
-      title: "Sede agregada",
-      description: `La sede "${sede.name}" ha sido agregada exitosamente.`,
-    });
-  };
-
-  const updateSede = (empresaId: string, sedeId: string, sedeData: Partial<Sede>) => {
-    const updatedSettings = {
-      ...settings,
-      empresas: settings.empresas.map(empresa => 
-        empresa.id === empresaId 
-          ? {
-              ...empresa,
-              sedes: empresa.sedes.map(sede =>
-                sede.id === sedeId ? { ...sede, ...sedeData } : sede
-              )
-            }
-          : empresa
-      )
-    };
-
-    setSettings(updatedSettings);
-    localStorage.setItem('app_settings', JSON.stringify(updatedSettings));
-
-    toast({
-      title: "Sede actualizada",
-      description: "Los datos de la sede han sido actualizados exitosamente.",
-    });
-  };
-
-  const removeSede = (empresaId: string, sedeId: string) => {
-    const empresa = settings.empresas.find(e => e.id === empresaId);
-    const sede = empresa?.sedes.find(s => s.id === sedeId);
-
-    const updatedSettings = {
-      ...settings,
-      empresas: settings.empresas.map(empresa => 
-        empresa.id === empresaId 
-          ? {
-              ...empresa,
-              sedes: empresa.sedes.filter(sede => sede.id !== sedeId)
-            }
-          : empresa
-      )
-    };
-
-    setSettings(updatedSettings);
-    localStorage.setItem('app_settings', JSON.stringify(updatedSettings));
-
-    toast({
-      title: "Sede eliminada",
-      description: `La sede "${sede?.name}" ha sido eliminada exitosamente.`,
-      variant: "destructive"
-    });
-  };
-
-  // Funciones de utilidad
-  const getSedesByEmpresa = (empresaId: string): Sede[] => {
-    const empresa = settings.empresas.find(e => e.id === empresaId);
-    return empresa?.sedes || [];
-  };
-
-  const getAllEmpresas = (): Empresa[] => {
-    return settings.empresas;
   };
 
   // Cargar configuraciones desde localStorage al inicializar
   useEffect(() => {
-    const savedSettings = localStorage.getItem('app_settings');
+    const savedSettings = localStorage.getItem('app_general_settings');
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
@@ -259,66 +87,91 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Inicializar QZ Tray (sin polling)
   const initializeQzTray = async (): Promise<boolean> => {
     try {
-      console.log("🚀 Inicializando QZ Tray (modo WebSocket only)...");
+      console.log("🚀 Inicializando QZ Tray...");
 
       const connected = await qzTray.initQzTray({
-        usingSecure: false,
-        retries: 3,
-        delay: 1
+        polling: false, // Deshabilitado por defecto
+        onPrinterListChanged: (printers: string[]) => {
+          setAvailablePrinters(printers);
+        }
       });
+
+      setQzTrayConnected(connected);
 
       if (connected) {
         console.log("✅ QZ Tray conectado exitosamente");
-        setQzTrayConnected(true);
+        toast({
+          title: "QZ Tray Conectado",
+          description: "La conexión con QZ Tray ha sido establecida exitosamente.",
+        });
 
-        // Obtener impresoras disponibles una vez
-        try {
-          const printers = await qzTray.getPrinters();
-          console.log(`🖨️ ${printers.length} impresoras detectadas:`, printers);
-          setAvailablePrinters(printers);
-        } catch (error) {
-          console.error("Error al obtener impresoras:", error);
-        }
-
-        console.log("📡 Sistema configurado para usar solo WebSocket");
-        console.log("🚫 Polling desactivado - Procesamiento en tiempo real vía WebSocket");
+        // Obtener lista inicial de impresoras
+        await refreshPrinters();
       } else {
         console.log("❌ No se pudo conectar a QZ Tray");
-        setQzTrayConnected(false);
+        toast({
+          title: "Error de conexión",
+          description: "No se pudo conectar a QZ Tray. Verifica que esté instalado y funcionando.",
+          variant: "destructive",
+        });
       }
 
       return connected;
     } catch (error) {
-      console.error("Error al inicializar QZ Tray:", error);
+      console.error("❌ Error al inicializar QZ Tray:", error);
       setQzTrayConnected(false);
+      toast({
+        title: "Error de QZ Tray",
+        description: "Ocurrió un error al conectar con QZ Tray.",
+        variant: "destructive",
+      });
       return false;
     }
   };
 
-  // Función para refrescar impresoras manualmente
-  const refreshPrinters = async () => {
-    if (!qzTrayConnected) return;
-
+  // Refrescar lista de impresoras
+  const refreshPrinters = async (): Promise<void> => {
     try {
+      if (!qzTrayConnected) {
+        console.log("⚠️ QZ Tray no está conectado");
+        return;
+      }
+
+      console.log("🔄 Refrescando lista de impresoras...");
       const printers = await qzTray.getPrinters();
       setAvailablePrinters(printers);
-      console.log(`🔄 Impresoras actualizadas: ${printers.length} encontradas`);
+      console.log(`✅ Se encontraron ${printers.length} impresoras:`, printers);
+
+      toast({
+        title: "Lista actualizada",
+        description: `Se encontraron ${printers.length} impresoras disponibles.`,
+      });
     } catch (error) {
-      console.error("Error al refrescar impresoras:", error);
+      console.error("❌ Error al refrescar impresoras:", error);
+      toast({
+        title: "Error al actualizar",
+        description: "No se pudo actualizar la lista de impresoras.",
+        variant: "destructive",
+      });
     }
   };
 
-  // Inicializar QZ Tray cuando el usuario esté autenticado
+  // Auto-inicializar QZ Tray cuando el usuario se autentica
   useEffect(() => {
-    if (isAuthenticated && !qzTrayConnected) {
-      initializeQzTray();
+    if (isAuthenticated && settings.autoConnectQzTray && !qzTrayConnected) {
+      // Esperar un poco antes de inicializar automáticamente
+      const timer = setTimeout(() => {
+        initializeQzTray();
+      }, 1000);
+
+      return () => clearTimeout(timer);
     } else if (!isAuthenticated && qzTrayConnected) {
       // Desconectar si el usuario cierra sesión
       qzTray.disconnectQzTray();
       setQzTrayConnected(false);
       setAvailablePrinters([]);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, settings.autoConnectQzTray]);
 
   const value: AppContextType = {
     isAuthenticated,
@@ -328,15 +181,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     refreshPrinters,
     settings,
     updateSettings,
-    // Nuevas funciones
-    addEmpresa,
-    updateEmpresa,
-    removeEmpresa,
-    addSede,
-    updateSede,
-    removeSede,
-    getSedesByEmpresa,
-    getAllEmpresas
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -357,15 +201,6 @@ export const useAppSettings = () => {
   return {
     settings: context.settings,
     updateSettings: context.updateSettings,
-    // Funciones para empresas y sedes
-    addEmpresa: context.addEmpresa,
-    updateEmpresa: context.updateEmpresa,
-    removeEmpresa: context.removeEmpresa,
-    addSede: context.addSede,
-    updateSede: context.updateSede,
-    removeSede: context.removeSede,
-    getSedesByEmpresa: context.getSedesByEmpresa,
-    getAllEmpresas: context.getAllEmpresas
   };
 };
 

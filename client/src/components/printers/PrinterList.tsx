@@ -1,3 +1,5 @@
+// client/src/components/printers/PrinterList.tsx - ACTUALIZADO PARA API
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -43,7 +45,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import CompanyLocationSelector from "@/components/ui/CompanyLocationSelector";
-import { useAppSettings } from "@/components/AppContext";
+import { useCompanies } from "@/hooks/useCompanies"; // ✅ NUEVO: Usar hook de API
 
 interface Printer {
   id: number;           // ← ID numérico de la BD (auto-increment)
@@ -62,14 +64,20 @@ interface PrinterEditForm extends Partial<Printer> {
   floorName?: string;
 }
 
-// Función auxiliar para encontrar nombres por IDs
+// ✅ NUEVO: Hook actualizado para usar API
 const useLocationNames = () => {
-  const { getAllEmpresas } = useAppSettings();
+  const { data: companies = [] } = useCompanies(); // ✅ Usar hook de API
 
   const getLocationNames = (locationId: string, floorId: string) => {
-    const empresas = getAllEmpresas();
-    const empresa = empresas.find(e => e.id === locationId);
-    const sede = empresa?.sedes.find(s => s.id === floorId);
+    // Convertir a números para comparación
+    const companyId = Number(locationId);
+    const sedeId = Number(floorId);
+
+    // Buscar empresa
+    const empresa = companies.find(e => e.id === companyId);
+
+    // Buscar sede dentro de la empresa
+    const sede = empresa?.locations.find(s => s.id === sedeId);
 
     return {
       empresaName: empresa?.name || '',
@@ -77,12 +85,12 @@ const useLocationNames = () => {
     };
   };
 
-  return { getLocationNames };
+  return { getLocationNames, companies };
 };
 
-// Componente para mostrar empresa y sede en la tabla
+// ✅ ACTUALIZADO: Componente para mostrar empresa y sede en la tabla
 const PrinterLocationDisplay: React.FC<{ printer: Printer }> = ({ printer }) => {
-  const { getAllEmpresas } = useAppSettings();
+  const { companies } = useLocationNames(); // ✅ Usar hook actualizado
 
   const getLocationDisplay = () => {
     if (!printer.location && !printer.floor) {
@@ -93,9 +101,12 @@ const PrinterLocationDisplay: React.FC<{ printer: Printer }> = ({ printer }) => 
       );
     }
 
-    const empresas = getAllEmpresas();
-    const empresa = empresas.find(e => e.id === printer.location);
-    const sede = empresa?.sedes.find(s => s.id === printer.floor);
+    // Convertir a números para comparación
+    const companyId = Number(printer.location);
+    const sedeId = Number(printer.floor);
+
+    const empresa = companies.find(e => e.id === companyId);
+    const sede = empresa?.locations.find(s => s.id === sedeId);
 
     if (empresa && sede) {
       return (
@@ -112,7 +123,7 @@ const PrinterLocationDisplay: React.FC<{ printer: Printer }> = ({ printer }) => 
       );
     }
 
-    // Fallback para datos antiguos
+    // Fallback para datos antiguos o IDs no válidos
     return (
       <div className="space-y-1">
         <div className="text-sm text-amber-600">
@@ -281,7 +292,7 @@ const PrinterList: React.FC = () => {
   };
 
   const filteredPrinters = printers
-    ? printers.filter((printer) => {
+    ?.filter((printer) => {
         const matchesSearch =
           printer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           printer.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -292,7 +303,7 @@ const PrinterList: React.FC = () => {
 
         return matchesSearch && matchesStatus;
       })
-    : [];
+    || [];
 
   if (isLoading) {
     return (
@@ -375,7 +386,7 @@ const PrinterList: React.FC = () => {
             ) : (
               filteredPrinters.map((printer) => (
                 <tr key={printer.id} className="hover:bg-gray-50">
-                  
+
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0">
@@ -426,10 +437,9 @@ const PrinterList: React.FC = () => {
                     >
                       {
                         printer.status === "online" ? "En línea" :
-                        printer.status === "offline" ? "Desconectada" :
                         printer.status === "busy" ? "Ocupada" :
                         printer.status === "error" ? "Error" :
-                        printer.status.charAt(0).toUpperCase() + printer.status.slice(1)
+                        "Desconectada"
                       }
                     </span>
                   </td>
@@ -438,29 +448,25 @@ const PrinterList: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     {user?.isAdmin && (
-                      <>
+                      <div className="flex space-x-2">
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          className="text-primary-600 hover:text-primary-900 mr-2"
                           onClick={() => openEditDialog(printer)}
                         >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Editar
+                          <Edit className="h-4 w-4" />
                         </Button>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          className="text-red-600 hover:text-red-900"
                           onClick={() => {
                             setSelectedPrinter(printer);
                             setConfirmDelete(true);
                           }}
                         >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Eliminar
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      </>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -470,101 +476,73 @@ const PrinterList: React.FC = () => {
         </table>
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar impresora?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción eliminará permanentemente la impresora "{selectedPrinter?.name}" (ID: #{selectedPrinter?.id}).
-              Esta acción no se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => selectedPrinter && deleteMutation.mutate(selectedPrinter.id)}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Edit Printer Dialog */}
+      {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={closeEditDialog}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Editar Impresora</DialogTitle>
             <DialogDescription>
-              Modifica los datos de la impresora "{selectedPrinter?.name}" (ID: #{selectedPrinter?.id}).
+              Modifica los detalles de la impresora seleccionada.
             </DialogDescription>
           </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Nombre</Label>
-              <Input 
-                id="edit-name" 
-                value={editFormData.name || ''} 
-                onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
-                placeholder="Nombre de la impresora"
-              />
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Nombre</Label>
+                <Input
+                  id="edit-name"
+                  value={editFormData.name || ''}
+                  onChange={(e) =>
+                    setEditFormData(prev => ({ ...prev, name: e.target.value }))
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-model">Modelo</Label>
+                <Input
+                  id="edit-model"
+                  value={editFormData.model || ''}
+                  onChange={(e) =>
+                    setEditFormData(prev => ({ ...prev, model: e.target.value }))
+                  }
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-model">Modelo</Label>
-              <Input 
-                id="edit-model" 
-                value={editFormData.model || ''} 
-                onChange={(e) => setEditFormData({...editFormData, model: e.target.value})}
-                placeholder="Modelo de la impresora"
+              <Label htmlFor="edit-uniqueId">ID Único</Label>
+              <Input
+                id="edit-uniqueId"
+                value={editFormData.uniqueId || ''}
+                onChange={(e) =>
+                  setEditFormData(prev => ({ ...prev, uniqueId: e.target.value }))
+                }
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="edit-uniqueId">ID Único (para QZ Tray)</Label>
-              <Input 
-                id="edit-uniqueId" 
-                value={editFormData.uniqueId || ''} 
-                onChange={(e) => setEditFormData({...editFormData, uniqueId: e.target.value})}
-                placeholder="ID único de la impresora"
-              />
-              <p className="text-xs text-gray-500">
-                Este es el identificador único que usa QZ Tray para encontrar la impresora.
-              </p>
             </div>
 
             {/* Selector de Empresa y Sede */}
             <div className="space-y-2">
-              <Label className="text-base font-medium">Asignación de Ubicación</Label>
+              <Label className="text-base font-medium">Ubicación de la Impresora</Label>
               <CompanyLocationSelector
                 selectedEmpresa={editSelectedEmpresa}
                 selectedSede={editSelectedSede}
                 onEmpresaChange={handleEditEmpresaChange}
                 onSedeChange={handleEditSedeChange}
-                required={true}
+                required={false}
                 showLabels={true}
               />
-
-              {/* Mostrar selección actual si hay una */}
-              {editFormData.locationName && editFormData.floorName && (
-                <div className="text-sm text-blue-600 bg-blue-50 p-2 rounded border">
-                  <div><strong>Empresa:</strong> {editFormData.locationName}</div>
-                  <div><strong>Sede:</strong> {editFormData.floorName}</div>
-                </div>
-              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="edit-status">Estado</Label>
               <Select
-                value={editFormData.status}
-                onValueChange={(value) => setEditFormData({...editFormData, status: value})}
+                value={editFormData.status || 'offline'}
+                onValueChange={(value) =>
+                  setEditFormData(prev => ({ ...prev, status: value }))
+                }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar estado" />
+                  <SelectValue placeholder="Selecciona el estado" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="online">En línea</SelectItem>
@@ -574,52 +552,61 @@ const PrinterList: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="flex items-center space-x-2">
-              <Input 
-                type="checkbox" 
-                id="edit-active" 
-                className="w-4 h-4" 
-                checked={editFormData.isActive || false} 
-                onChange={(e) => setEditFormData({...editFormData, isActive: e.target.checked})}
-              />
-              <Label htmlFor="edit-active">Impresora activa</Label>
-            </div>
           </div>
-
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={closeEditDialog}
-            >
+            <Button variant="outline" onClick={closeEditDialog}>
               Cancelar
             </Button>
             <Button
               onClick={() => {
-                // Validar que se haya seleccionado empresa y sede
-                if (!editSelectedEmpresa || !editSelectedSede) {
-                  toast({
-                    title: "Selección incompleta",
-                    description: "Debe seleccionar tanto la empresa como la sede",
-                    variant: "destructive",
-                  });
-                  return;
-                }
-
                 if (selectedPrinter) {
                   updateMutation.mutate({
-                    id: selectedPrinter.id, 
-                    printerData: editFormData
+                    id: selectedPrinter.id,
+                    printerData: {
+                      name: editFormData.name,
+                      model: editFormData.model,
+                      uniqueId: editFormData.uniqueId,
+                      location: editSelectedEmpresa,
+                      floor: editSelectedSede,
+                      status: editFormData.status,
+                      isActive: editFormData.isActive,
+                    }
                   });
                 }
               }}
-              disabled={updateMutation.isPending || !editSelectedEmpresa || !editSelectedSede}
+              disabled={updateMutation.isPending}
             >
-              {updateMutation.isPending ? "Guardando..." : "Guardar Cambios"}
+              {updateMutation.isPending ? "Guardando..." : "Guardar"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. La impresora "{selectedPrinter?.name}" 
+              será eliminada permanentemente del sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (selectedPrinter) {
+                  deleteMutation.mutate(selectedPrinter.id);
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -9,12 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2, MapPin } from "lucide-react";
-import { useAppSettings } from "@/components/AppContext";
+import { Building2, MapPin, Loader2 } from "lucide-react";
+import { useCompanies } from "@/hooks/useCompanies";
 
 interface CompanyLocationSelectorProps {
-  selectedEmpresa?: string;
-  selectedSede?: string;
+  selectedEmpresa?: string | number;
+  selectedSede?: string | number;
   onEmpresaChange: (empresaId: string, empresaName: string) => void;
   onSedeChange: (sedeId: string, sedeName: string) => void;
   disabled?: boolean;
@@ -31,25 +31,41 @@ const CompanyLocationSelector: React.FC<CompanyLocationSelectorProps> = ({
   required = false,
   showLabels = true
 }) => {
-  const { getAllEmpresas, getSedesByEmpresa } = useAppSettings();
-  const [currentEmpresa, setCurrentEmpresa] = useState(selectedEmpresa);
-  const [currentSede, setCurrentSede] = useState(selectedSede);
+  // Usar hook de API en lugar de AppContext
+  const { data: companies = [], isLoading, error } = useCompanies();
 
-  const empresas = getAllEmpresas();
-  const sedesDisponibles = currentEmpresa ? getSedesByEmpresa(currentEmpresa) : [];
+  // Convertir a string para consistencia
+  const [currentEmpresa, setCurrentEmpresa] = useState(String(selectedEmpresa));
+  const [currentSede, setCurrentSede] = useState(String(selectedSede));
+
+  // Obtener sedes disponibles para la empresa seleccionada
+  const sedesDisponibles = currentEmpresa 
+    ? companies.find(c => String(c.id) === currentEmpresa)?.locations || []
+    : [];
 
   // Efectos para sincronizar con props
   useEffect(() => {
-    setCurrentEmpresa(selectedEmpresa);
+    setCurrentEmpresa(String(selectedEmpresa));
   }, [selectedEmpresa]);
 
   useEffect(() => {
-    setCurrentSede(selectedSede);
+    setCurrentSede(String(selectedSede));
   }, [selectedSede]);
+
+  // Limpiar sede si no está disponible en la nueva empresa
+  useEffect(() => {
+    if (currentEmpresa && currentSede) {
+      const sedeExists = sedesDisponibles.some(s => String(s.id) === currentSede);
+      if (!sedeExists && currentSede !== '') {
+        setCurrentSede('');
+        onSedeChange('', '');
+      }
+    }
+  }, [currentEmpresa, sedesDisponibles, currentSede, onSedeChange]);
 
   // Manejar cambio de empresa
   const handleEmpresaChange = (empresaId: string) => {
-    const empresa = empresas.find(e => e.id === empresaId);
+    const empresa = companies.find(e => String(e.id) === empresaId);
     if (empresa) {
       setCurrentEmpresa(empresaId);
       setCurrentSede(''); // Limpiar sede cuando cambia empresa
@@ -60,12 +76,37 @@ const CompanyLocationSelector: React.FC<CompanyLocationSelectorProps> = ({
 
   // Manejar cambio de sede
   const handleSedeChange = (sedeId: string) => {
-    const sede = sedesDisponibles.find(s => s.id === sedeId);
+    const sede = sedesDisponibles.find(s => String(s.id) === sedeId);
     if (sede) {
       setCurrentSede(sedeId);
       onSedeChange(sedeId, sede.name);
     }
   };
+
+  // Mostrar estado de carga
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Cargando empresas y sedes...
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar error si hay problema con la API
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <div className="text-sm text-red-500 bg-red-50 p-3 rounded border">
+          <strong>Error:</strong> No se pudieron cargar las empresas y sedes.
+          <br />
+          <span className="text-xs">Verifica que el servidor esté funcionando.</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -87,19 +128,16 @@ const CompanyLocationSelector: React.FC<CompanyLocationSelectorProps> = ({
             <SelectValue placeholder="Selecciona una empresa" />
           </SelectTrigger>
           <SelectContent>
-            {empresas.length === 0 ? (
-              <SelectItem value="_no_empresas" disabled>
-                No hay empresas configuradas
+            {companies.length === 0 ? (
+              <SelectItem value="no-companies" disabled>
+                No hay empresas disponibles
               </SelectItem>
             ) : (
-              empresas.map((empresa) => (
-                <SelectItem key={empresa.id} value={empresa.id}>
+              companies.map((empresa) => (
+                <SelectItem key={empresa.id} value={String(empresa.id)}>
                   <div className="flex items-center gap-2">
                     <Building2 className="h-4 w-4" />
                     {empresa.name}
-                    <span className="text-muted-foreground text-sm">
-                      ({empresa.sedes.length} sedes)
-                    </span>
                   </div>
                 </SelectItem>
               ))
@@ -123,24 +161,26 @@ const CompanyLocationSelector: React.FC<CompanyLocationSelectorProps> = ({
           required={required}
         >
           <SelectTrigger id="sede-selector">
-            <SelectValue placeholder={
-              !currentEmpresa 
-                ? "Primero selecciona una empresa" 
-                : "Selecciona una sede"
-            } />
+            <SelectValue 
+              placeholder={
+                !currentEmpresa 
+                  ? "Primero selecciona una empresa"
+                  : "Selecciona una sede"
+              } 
+            />
           </SelectTrigger>
           <SelectContent>
             {!currentEmpresa ? (
-              <SelectItem value="_no_empresa" disabled>
+              <SelectItem value="no-empresa" disabled>
                 Selecciona una empresa primero
               </SelectItem>
             ) : sedesDisponibles.length === 0 ? (
-              <SelectItem value="_no_sedes" disabled>
-                No hay sedes configuradas para esta empresa
+              <SelectItem value="no-sedes" disabled>
+                No hay sedes disponibles para esta empresa
               </SelectItem>
             ) : (
               sedesDisponibles.map((sede) => (
-                <SelectItem key={sede.id} value={sede.id}>
+                <SelectItem key={sede.id} value={String(sede.id)}>
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
                     {sede.name}
@@ -154,26 +194,14 @@ const CompanyLocationSelector: React.FC<CompanyLocationSelectorProps> = ({
 
       {/* Información adicional */}
       {currentEmpresa && currentSede && (
-        <div className="text-sm text-muted-foreground bg-blue-50 p-2 rounded border">
+        <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded border">
           <div className="flex items-center gap-1">
             <Building2 className="h-3 w-3" />
-            <strong>Empresa:</strong> {empresas.find(e => e.id === currentEmpresa)?.name}
+            <strong>Empresa:</strong> {companies.find(c => String(c.id) === currentEmpresa)?.name}
           </div>
           <div className="flex items-center gap-1 mt-1">
             <MapPin className="h-3 w-3" />
-            <strong>Sede:</strong> {sedesDisponibles.find(s => s.id === currentSede)?.name}
-          </div>
-        </div>
-      )}
-
-      {/* Mensaje de ayuda cuando no hay empresas configuradas */}
-      {empresas.length === 0 && (
-        <div className="text-sm text-amber-600 bg-amber-50 p-2 rounded border border-amber-200">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
-            <span>
-              No hay empresas configuradas. Ve a <strong>Configuración → Empresas y Sedes</strong> para agregar empresas.
-            </span>
+            <strong>Sede:</strong> {sedesDisponibles.find(s => String(s.id) === currentSede)?.name}
           </div>
         </div>
       )}
