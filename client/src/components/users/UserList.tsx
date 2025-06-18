@@ -116,7 +116,7 @@ const OnlineIndicator: React.FC<{ user: User; activeUsers: ActiveUser[] }> = ({ 
             En línea
           </Badge>
           <div className="text-gray-500 mt-1">
-            {duration > 0 ? `${duration}m conectado` : 'Recién conectado'}
+            {duration > 0 ? `${duration}m conectado` : ''}
           </div>
         </div>
       </div>
