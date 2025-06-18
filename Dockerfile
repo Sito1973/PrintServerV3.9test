@@ -97,5 +97,5 @@ echo "🎯 Starting server on port $PORT..."\n\
 exec node dist/index.js' > /app/start.sh && chmod +x /app/start.sh
 
 # Usar dumb-init para manejo correcto de señales
-ENTRYPOINT ["dumb-init", "--"]
+#ENTRYPOINT ["dumb-init", "--"]
 CMD ["/app/start.sh"]
