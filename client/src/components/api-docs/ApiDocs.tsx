@@ -352,28 +352,38 @@ const ApiDocs: React.FC = () => {
   "documentUrl": "https://example.com/document.pdf",
   "documentName": "Documento de prueba",
 
-  // Configuración básica de impresión
+  // ========== CONFIGURACIÓN BÁSICA ==========
   "copies": 2,                    // Número de copias (1-999)
-  "duplex": true,                 // Impresión a doble cara (true/false)
-  "orientation": "portrait",      // Orientación: "portrait" o "landscape"
+  "duplex": true,                 // Impresión a doble cara automática
+  "orientation": "portrait",      // Orientación del papel
 
-  // Márgenes en milímetros
+  // ========== MÁRGENES EN MILÍMETROS ==========
   "margins": {
-    "top": 15,                    // Margen superior (mm)
+    "top": 15,                    // Margen superior (mm) - Default: 6.35mm (0.25")
     "right": 15,                  // Margen derecho (mm)
     "bottom": 15,                 // Margen inferior (mm)
     "left": 15                    // Margen izquierdo (mm)
   },
 
-  // Opciones avanzadas de QZ Tray
+  // ========== OPCIONES AVANZADAS QZ TRAY ==========
   "options": {
-    "ignoreTransparency": true,   // Ignorar transparencias en PDF/imágenes
-    "altFontRendering": true,     // Renderizado alternativo de fuentes
-    "pageRanges": "1-5",          // Rango de páginas: "1-5", "1,3,5" o "all"
-    "scaleContent": true,         // Escalar contenido al tamaño de página
-    "rasterize": false,           // Convertir a imagen antes de imprimir
-    "colorType": "grayscale",     // Tipo de color: "color", "grayscale", "blackwhite"
-    "density": 600                // Densidad/DPI para impresión (72-1200)
+    // Control de transparencias y renderizado
+    "ignoreTransparency": false,  // Procesar transparencias PDF correctamente
+    "altFontRendering": true,     // Usar renderizado alternativo para fuentes problemáticas
+    "rasterize": false,           // false=Vector PDF, true=Convertir a imagen bitmap
+
+    // Selección de páginas
+    "pageRanges": "1-5",          // Páginas específicas: "1-5", "1,3,5", "2-", "all"
+    
+    // Escalado y ajuste
+    "scaleContent": true,         // Escalar automáticamente al tamaño de papel
+    
+    // Calidad y color
+    "colorType": "grayscale",     // color, grayscale, blackwhite
+    "density": 600,               // DPI de impresión (72-1200) - Afecta calidad
+    
+    // Interpolación para imágenes (opcional)
+    "interpolation": "bicubic"    // nearest, bilinear, bicubic, lanczos
   }
 }`;
 
@@ -508,46 +518,172 @@ const ApiDocs: React.FC = () => {
                 </p>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <h4 className="font-semibold text-blue-800 mb-2">📋 Configuraciones Disponibles</h4>
-                  <div className="text-sm text-blue-700 space-y-1">
-                    <p><strong>orientation:</strong> "portrait", "landscape", "reverse-portrait", "reverse-landscape"</p>
-                    <p><strong>colorType:</strong> "color", "grayscale", "blackwhite"</p>
-                    <p><strong>pageRanges:</strong> "1-5", "1,3,5", "2-", "all" (páginas específicas)</p>
-                    <p><strong>density:</strong> 72-1200 DPI para calidad de impresión</p>
-                    <p><strong>margins:</strong> En milímetros (equivale a 0.25" = 6.35mm)</p>
+                  <h4 className="font-semibold text-blue-800 mb-3">📋 Guía Completa de Configuraciones QZ Tray</h4>
+                  
+                  <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-700">
+                    <div>
+                      <h5 className="font-semibold mb-1">🔄 Orientación del Papel</h5>
+                      <ul className="text-xs space-y-0.5 pl-2">
+                        <li>• <code>"portrait"</code> - Vertical (predeterminado)</li>
+                        <li>• <code>"landscape"</code> - Horizontal</li>
+                        <li>• <code>"reverse-portrait"</code> - Vertical invertido</li>
+                        <li>• <code>"reverse-landscape"</code> - Horizontal invertido</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h5 className="font-semibold mb-1">🎨 Tipos de Color</h5>
+                      <ul className="text-xs space-y-0.5 pl-2">
+                        <li>• <code>"color"</code> - Impresión a color completo</li>
+                        <li>• <code>"grayscale"</code> - Escala de grises</li>
+                        <li>• <code>"blackwhite"</code> - Solo blanco y negro</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h5 className="font-semibold mb-1">📄 Selección de Páginas</h5>
+                      <ul className="text-xs space-y-0.5 pl-2">
+                        <li>• <code>"all"</code> - Todas las páginas</li>
+                        <li>• <code>"1-5"</code> - Páginas del 1 al 5</li>
+                        <li>• <code>"1,3,5"</code> - Páginas específicas</li>
+                        <li>• <code>"2-"</code> - Desde la página 2 hasta el final</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h5 className="font-semibold mb-1">⚙️ Calidad de Impresión</h5>
+                      <ul className="text-xs space-y-0.5 pl-2">
+                        <li>• <code>density: 300</code> - Calidad estándar</li>
+                        <li>• <code>density: 600</code> - Alta calidad</li>
+                        <li>• <code>density: 1200</code> - Máxima calidad</li>
+                        <li>• Rango: 72-1200 DPI</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h5 className="font-semibold mb-1">📏 Márgenes</h5>
+                      <ul className="text-xs space-y-0.5 pl-2">
+                        <li>• Valores en <strong>milímetros</strong></li>
+                        <li>• Default: 6.35mm (≈ 0.25 pulgadas)</li>
+                        <li>• Mínimo recomendado: 5mm</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h5 className="font-semibold mb-1">🔧 Opciones Avanzadas</h5>
+                      <ul className="text-xs space-y-0.5 pl-2">
+                        <li>• <code>rasterize: false</code> - Mantener vectores PDF</li>
+                        <li>• <code>scaleContent: true</code> - Ajustar al papel</li>
+                        <li>• <code>altFontRendering</code> - Fuentes problemáticas</li>
+                        <li>• <code>ignoreTransparency</code> - Control de transparencias</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 p-2 bg-blue-100 rounded text-xs">
+                    <strong>💡 Tip:</strong> Para documentos complejos usa <code>rasterize: true</code> y <code>density: 300</code>. 
+                    Para texto simple mantén <code>rasterize: false</code> para mejor calidad.
                   </div>
                 </div>
-              <h4 className="font-semibold mb-2">Ejemplo con Comentarios (Para Referencia):</h4>
-                <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
-                  <code>{printJobExample}</code>
-                </pre>
+              <div className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold mb-2">📖 Ejemplo Completo con Comentarios:</h4>
+                    <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+                      <code>{printJobExample}</code>
+                    </pre>
+                  </div>
 
-                <h4 className="font-semibold mb-2 mt-4">JSON Limpio para Postman:</h4>
-                <pre className="bg-green-50 border border-green-200 p-4 rounded-lg overflow-x-auto text-sm">
-                  <code>{`{
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-semibold mb-2 text-green-700">✅ Uso Básico - Documentos Simples</h4>
+                      <pre className="bg-green-50 border border-green-200 p-3 rounded-lg overflow-x-auto text-xs">
+                        <code>{`{
   "printerId": 1,
-  "documentUrl": "https://example.com/document.pdf",
-  "documentName": "Documento con opciones",
-  "copies": 2,
+  "documentUrl": "https://example.com/factura.pdf",
+  "documentName": "Factura #001",
+  "copies": 1,
+  "orientation": "portrait"
+}`}</code>
+                      </pre>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold mb-2 text-blue-700">🎯 Uso Avanzado - Documentos Complejos</h4>
+                      <pre className="bg-blue-50 border border-blue-200 p-3 rounded-lg overflow-x-auto text-xs">
+                        <code>{`{
+  "printerId": 1,
+  "documentUrl": "https://example.com/planos.pdf",
+  "documentName": "Planos Arquitectónicos",
+  "copies": 3,
   "duplex": true,
-  "orientation": "portrait",
+  "orientation": "landscape",
   "margins": {
-    "top": 15,
-    "right": 15,
-    "bottom": 15,
-    "left": 15
+    "top": 10,
+    "right": 10,
+    "bottom": 10,
+    "left": 10
   },
   "options": {
-    "ignoreTransparency": false,
-    "altFontRendering": true,
-    "pageRanges": "1-5",
-    "scaleContent": true,
-    "rasterize": false,
-    "colorType": "grayscale",
-    "density": 600
+    "pageRanges": "1-10",
+    "colorType": "color",
+    "density": 600,
+    "scaleContent": false,
+    "rasterize": true
   }
 }`}</code>
-                </pre>
+                      </pre>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold mb-2 text-purple-700">📊 Reportes - Alta Calidad</h4>
+                      <pre className="bg-purple-50 border border-purple-200 p-3 rounded-lg overflow-x-auto text-xs">
+                        <code>{`{
+  "printerId": 1,
+  "documentUrl": "https://example.com/reporte.pdf",
+  "documentName": "Reporte Mensual",
+  "copies": 2,
+  "duplex": true,
+  "options": {
+    "colorType": "grayscale",
+    "density": 600,
+    "altFontRendering": true,
+    "scaleContent": true,
+    "interpolation": "bicubic"
+  }
+}`}</code>
+                      </pre>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold mb-2 text-orange-700">⚡ Impresión Rápida - Borrador</h4>
+                      <pre className="bg-orange-50 border border-orange-200 p-3 rounded-lg overflow-x-auto text-xs">
+                        <code>{`{
+  "printerId": 1,
+  "documentUrl": "https://example.com/borrador.pdf",
+  "documentName": "Borrador de Trabajo",
+  "copies": 1,
+  "options": {
+    "colorType": "blackwhite",
+    "density": 150,
+    "rasterize": false,
+    "scaleContent": true
+  }
+}`}</code>
+                      </pre>
+                    </div>
+                  </div>
+
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Consideraciones Importantes</h4>
+                    <ul className="text-sm text-yellow-700 space-y-1 list-disc pl-4">
+                      <li><strong>URLs:</strong> Deben ser accesibles públicamente (no localhost)</li>
+                      <li><strong>Tamaño:</strong> Archivos grandes pueden tardar más en procesarse</li>
+                      <li><strong>Formatos:</strong> Principalmente PDF, también soporta imágenes comunes</li>
+                      <li><strong>Transparencias:</strong> Si el PDF tiene problemas, usar <code>"rasterize": true</code></li>
+                      <li><strong>Fuentes:</strong> Para fuentes especiales usar <code>"altFontRendering": true</code></li>
+                    </ul>
+                  </div>
+                </div>
             </div>
 
             {/* Get Print Jobs */}
