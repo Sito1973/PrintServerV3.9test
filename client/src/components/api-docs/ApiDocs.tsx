@@ -104,7 +104,7 @@ const ApiDocs: React.FC = () => {
               ],
               "body": {
                 "mode": "raw",
-                "raw": "{\n  \"printerId\": \"printer123\",\n  \"documentUrl\": \"https://example.com/path/to/document.pdf\",\n  \"options\": {\n    \"copies\": 1,\n    \"duplex\": false,\n    \"orientation\": \"portrait\"\n  }\n}"
+                "raw": "{\n  \"printerId\": \"printer123\",\n  \"documentUrl\": \"https://example.com/document.pdf\",\n  \"options\": {\n    \"copies\": 1,\n    \"duplex\": false,\n    \"orientation\": \"portrait\"\n  }\n}"
               },
               "url": {
                 "raw": "{{base_url}}/api/print",
@@ -347,6 +347,36 @@ const ApiDocs: React.FC = () => {
     document.body.removeChild(a);
   };
 
+  const printJobExample = `{
+  "printerId": 1,
+  "documentUrl": "https://example.com/document.pdf",
+  "documentName": "Documento de prueba",
+
+  // Configuración básica de impresión
+  "copies": 2,                    // Número de copias (1-999)
+  "duplex": true,                 // Impresión a doble cara (true/false)
+  "orientation": "portrait",      // Orientación: "portrait" o "landscape"
+
+  // Márgenes en milímetros
+  "margins": {
+    "top": 15,                    // Margen superior (mm)
+    "right": 15,                  // Margen derecho (mm)
+    "bottom": 15,                 // Margen inferior (mm)
+    "left": 15                    // Margen izquierdo (mm)
+  },
+
+  // Opciones avanzadas de QZ Tray
+  "options": {
+    "ignoreTransparency": true,   // Ignorar transparencias en PDF/imágenes
+    "altFontRendering": true,     // Renderizado alternativo de fuentes
+    "pageRanges": "1-5",          // Rango de páginas: "1-5", "1,3,5" o "all"
+    "scaleContent": true,         // Escalar contenido al tamaño de página
+    "rasterize": false,           // Convertir a imagen antes de imprimir
+    "colorType": "grayscale",     // Tipo de color: "color", "grayscale", "blackwhite"
+    "density": 600                // Densidad/DPI para impresión (72-1200)
+  }
+}`;
+
   return (
     <div>
       <h2 className="text-lg font-medium text-gray-900">API Documentation</h2>
@@ -473,33 +503,51 @@ const ApiDocs: React.FC = () => {
                   readOnly
                 />
               </div>
-              <div className="mt-2 bg-gray-50 p-4 rounded-md">
-                <pre className="text-xs overflow-auto text-gray-700">
-{`{
+              <p className="text-sm text-muted-foreground mb-4">
+                  Envía un documento para imprimir en la impresora especificada. Acepta todas las opciones de configuración de QZ Tray.
+                </p>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <h4 className="font-semibold text-blue-800 mb-2">📋 Configuraciones Disponibles</h4>
+                  <div className="text-sm text-blue-700 space-y-1">
+                    <p><strong>orientation:</strong> "portrait", "landscape", "reverse-portrait", "reverse-landscape"</p>
+                    <p><strong>colorType:</strong> "color", "grayscale", "blackwhite"</p>
+                    <p><strong>pageRanges:</strong> "1-5", "1,3,5", "2-", "all" (páginas específicas)</p>
+                    <p><strong>density:</strong> 72-1200 DPI para calidad de impresión</p>
+                    <p><strong>margins:</strong> En milímetros (equivale a 0.25" = 6.35mm)</p>
+                  </div>
+                </div>
+              <h4 className="font-semibold mb-2">Ejemplo con Comentarios (Para Referencia):</h4>
+                <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+                  <code>{printJobExample}</code>
+                </pre>
+
+                <h4 className="font-semibold mb-2 mt-4">JSON Limpio para Postman:</h4>
+                <pre className="bg-green-50 border border-green-200 p-4 rounded-lg overflow-x-auto text-sm">
+                  <code>{`{
   "printerId": 1,
   "documentUrl": "https://example.com/document.pdf",
-  "documentName": "Sample Document",
-  "copies": 1,
-  "duplex": false,
+  "documentName": "Documento con opciones",
+  "copies": 2,
+  "duplex": true,
   "orientation": "portrait",
   "margins": {
-    "top": 12.7,
-    "right": 12.7,
-    "bottom": 12.7,
-    "left": 12.7
+    "top": 15,
+    "right": 15,
+    "bottom": 15,
+    "left": 15
   },
   "options": {
-    "ignoreTransparency": true,
+    "ignoreTransparency": false,
     "altFontRendering": true,
-    "pageRanges": "1-3",
-    "scaleContent": false,
+    "pageRanges": "1-5",
+    "scaleContent": true,
     "rasterize": false,
-    "colorType": "color",
-    "density": 300
+    "colorType": "grayscale",
+    "density": 600
   }
-}`}
+}`}</code>
                 </pre>
-              </div>
             </div>
 
             {/* Get Print Jobs */}
