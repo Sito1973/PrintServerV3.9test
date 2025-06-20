@@ -1,4 +1,3 @@
-
 import { storage } from "./storage";
 import * as http from 'http';
 import * as https from 'https';
@@ -100,7 +99,7 @@ class PrintProcessor {
   private async processPendingJobs() {
     try {
       console.log("⚠️ [MÉTODO MANUAL] processPendingJobs llamado manualmente");
-      
+
       // Obtener todos los trabajos pendientes
       const allJobs = await storage.listPrintJobs();
       const pendingJobs = allJobs.filter(job => job.status === 'pending');
@@ -210,8 +209,13 @@ class PrintProcessor {
           orientation: job.orientation || 'portrait',
           copies: job.copies || 1,
           duplex: job.duplex || false,
-          ignoreTransparency: true,
-          altFontRendering: true
+          ignoreTransparency: job.options?.ignoreTransparency ?? true,
+          altFontRendering: job.options?.altFontRendering ?? true,
+          ...(job.options?.pageRanges && { pageRanges: job.options.pageRanges }),
+          ...(job.options?.scaleContent !== undefined && { scaleContent: job.options.scaleContent }),
+          ...(job.options?.rasterize !== undefined && { rasterize: job.options.rasterize }),
+          ...(job.options?.interpolation && { interpolation: job.options.interpolation }),
+          ...(job.options?.colorType && { colorType: job.options.colorType }),
         }
       };
 

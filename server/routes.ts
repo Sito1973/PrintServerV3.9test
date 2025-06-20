@@ -700,12 +700,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           options: {
             orientation: printData.orientation || 'portrait',
             copies: printData.copies || 1,
-            duplex: printData.duplex || false
+            duplex: printData.duplex || false,
+            ignoreTransparency: printData.options?.ignoreTransparency ?? true,
+            altFontRendering: printData.options?.altFontRendering ?? true,
+            ...(printData.options?.pageRanges && { pageRanges: printData.options.pageRanges }),
+            ...(printData.options?.scaleContent !== undefined && { scaleContent: printData.options.scaleContent }),
+            ...(printData.options?.rasterize !== undefined && { rasterize: printData.options.rasterize }),
+            ...(printData.options?.interpolation && { interpolation: printData.options.interpolation }),
+            ...(printData.options?.colorType && { colorType: printData.options.colorType }),
           }
         }],
         config: {
           jobName: `${documentName} - ID: ${printJob.id}`,
-          units: 'mm'
+          units: 'mm',
+          ...(printData.options?.density !== undefined && { density: printData.options.density }),
+          ...(printData.options?.colorType && { colorType: printData.options.colorType }),
+          ...(printData.options?.interpolation && { interpolation: printData.options.interpolation }),
+          ...(printData.options?.scaleContent !== undefined && { scaleContent: printData.options.scaleContent }),
+          ...(printData.options?.rasterize !== undefined && { rasterize: printData.options.rasterize }),
         }
       };
 

@@ -464,7 +464,7 @@ const ApiDocs: React.FC = () => {
             {/* Numeric ID Print */}
             <div>
               <div className="flex rounded-md shadow-sm">
-                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-green-50 text-green-700 text-sm font-medium">
+                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
                   POST
                 </span>
                 <Input
@@ -473,43 +473,32 @@ const ApiDocs: React.FC = () => {
                   readOnly
                 />
               </div>
-              <p className="mt-1 text-sm text-green-600 font-medium">⭐ Recomendado para Postman</p>
               <div className="mt-2 bg-gray-50 p-4 rounded-md">
                 <pre className="text-xs overflow-auto text-gray-700">
 {`{
-  "printerId": 14,
-  "documentUrl": "https://www.plasforte.com.ar/wp-content/uploads/2018/01/muestra-1.pdf",
-  "documentName": "Documento de prueba",
+  "printerId": 1,
+  "documentUrl": "https://example.com/document.pdf",
+  "documentName": "Sample Document",
   "copies": 1,
   "duplex": false,
-  "orientation": "portrait"
-}`}
-                </pre>
-              </div>
-              <div className="mt-2 bg-green-50 p-3 rounded-md">
-                <p className="text-sm text-green-700 font-medium">💡 Notas importantes:</p>
-                <ul className="mt-1 text-sm text-green-600 list-disc pl-4 space-y-1">
-                  <li>El <code>printerId</code> debe ser un número (sin comillas)</li>
-                  <li>Usa el ID numérico que aparece en la lista de impresoras</li>
-                  <li>Incluye <code>Content-Type: application/json</code> en los headers</li>
-                </ul>
-              </div>
-              <div className="mt-4">
-                <h4 className="text-sm font-medium text-gray-700">Response</h4>
-                <div className="mt-2 bg-gray-50 p-4 rounded-md">
-                  <pre className="text-xs overflow-auto text-gray-700">
-{`{
-  "success": true,
-  "jobId": 5,
-  "status": "pending",
-  "printer": {
-    "id": 14,
-    "name": "Microsoft Print to PDF",
-    "status": "online"
+  "orientation": "portrait",
+  "margins": {
+    "top": 12.7,
+    "right": 12.7,
+    "bottom": 12.7,
+    "left": 12.7
+  },
+  "options": {
+    "ignoreTransparency": true,
+    "altFontRendering": true,
+    "pageRanges": "1-3",
+    "scaleContent": false,
+    "rasterize": false,
+    "colorType": "color",
+    "density": 300
   }
 }`}
-                  </pre>
-                </div>
+                </pre>
               </div>
             </div>
 

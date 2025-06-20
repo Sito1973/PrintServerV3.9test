@@ -138,7 +138,7 @@ export const simplePrintJobRequestSchema = z.object({
   documentUrl: z.string().url(),
 });
 
-// Print job request schema for numeric printer ID - SIN CAMBIOS
+// Esquema para endpoint con ID numérico de impresora
 export const numericPrinterJobRequestSchema = z.object({
   printerId: z.number().int().positive(),
   documentUrl: z.string().url(),
@@ -147,11 +147,22 @@ export const numericPrinterJobRequestSchema = z.object({
   duplex: z.boolean().default(false),
   orientation: z.enum(["portrait", "landscape"]).default("portrait"),
   margins: z.object({
-    top: z.number().positive().default(12.7),    // mm (equivalente a 0.5 pulgadas)
-    right: z.number().positive().default(12.7),
-    bottom: z.number().positive().default(12.7),
-    left: z.number().positive().default(12.7)
-  }).optional()
+    top: z.number().optional(),
+    right: z.number().optional(),
+    bottom: z.number().optional(),
+    left: z.number().optional(),
+  }).optional(),
+  // Opciones adicionales de impresión
+  options: z.object({
+    ignoreTransparency: z.boolean().default(true),
+    altFontRendering: z.boolean().default(true),
+    pageRanges: z.string().optional(),
+    scaleContent: z.boolean().optional(),
+    rasterize: z.boolean().optional(),
+    interpolation: z.string().optional(),
+    colorType: z.string().optional(),
+    density: z.union([z.string(), z.number()]).optional(),
+  }).optional(),
 });
 
 // Types - Existentes
