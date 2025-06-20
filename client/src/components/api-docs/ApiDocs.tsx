@@ -593,23 +593,56 @@ const ApiDocs: React.FC = () => {
                     </pre>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                    <h4 className="font-semibold text-amber-800 mb-3">🔧 Manejo de Valores Faltantes</h4>
+                    <div className="text-sm text-amber-700 space-y-2">
+                      <p><strong>✅ Valores Opcionales:</strong> Si no se incluyen, se usan valores predeterminados seguros</p>
+                      <p><strong>❌ Valores Requeridos:</strong> <code>printerId</code> y <code>documentUrl</code> - Error 400 si faltan</p>
+                      <p><strong>🔄 Compatibilidad:</strong> JSON mínimo o completo - ambos funcionan perfectamente</p>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
-                      <h4 className="font-semibold mb-2 text-green-700">✅ Uso Básico - Documentos Simples</h4>
+                      <h4 className="font-semibold mb-2 text-blue-700">⚡ JSON Mínimo</h4>
+                      <p className="text-xs text-gray-600 mb-2">Solo valores esenciales</p>
+                      <pre className="bg-blue-50 border border-blue-200 p-3 rounded-lg overflow-x-auto text-xs">
+                        <code>{`{
+  "printerId": 1,
+  "documentUrl": "https://example.com/doc.pdf"
+}`}</code>
+                      </pre>
+                      <div className="mt-2 text-xs text-blue-600">
+                        <p>✅ Funciona perfectamente</p>
+                        <p>📄 copies: 1 (default)</p>
+                        <p>🔄 orientation: "portrait"</p>
+                        <p>📏 márgenes: 6.35mm c/lado</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold mb-2 text-green-700">✅ Uso Básico</h4>
+                      <p className="text-xs text-gray-600 mb-2">Configuración común</p>
                       <pre className="bg-green-50 border border-green-200 p-3 rounded-lg overflow-x-auto text-xs">
                         <code>{`{
   "printerId": 1,
   "documentUrl": "https://example.com/factura.pdf",
   "documentName": "Factura #001",
-  "copies": 1,
+  "copies": 2,
   "orientation": "portrait"
 }`}</code>
                       </pre>
+                      <div className="mt-2 text-xs text-green-600">
+                        <p>✅ Configuración estándar</p>
+                        <p>🔧 Usa defaults seguros</p>
+                        <p>⚡ Procesamiento rápido</p>
+                      </div>
                     </div>
 
                     <div>
-                      <h4 className="font-semibold mb-2 text-blue-700">🎯 Uso Avanzado - Documentos Complejos</h4>
-                      <pre className="bg-blue-50 border border-blue-200 p-3 rounded-lg overflow-x-auto text-xs">
+                      <h4 className="font-semibold mb-2 text-purple-700">🎯 Configuración Completa</h4>
+                      <p className="text-xs text-gray-600 mb-2">Todas las opciones</p>
+                      <pre className="bg-purple-50 border border-purple-200 p-3 rounded-lg overflow-x-auto text-xs">
                         <code>{`{
   "printerId": 1,
   "documentUrl": "https://example.com/planos.pdf",
@@ -632,6 +665,11 @@ const ApiDocs: React.FC = () => {
   }
 }`}</code>
                       </pre>
+                      <div className="mt-2 text-xs text-purple-600">
+                        <p>⚙️ Control total</p>
+                        <p>🎯 Máxima precisión</p>
+                        <p>🔧 Para casos especiales</p>
+                      </div>
                     </div>
 
                     <div>
@@ -673,6 +711,42 @@ const ApiDocs: React.FC = () => {
                     </div>
                   </div>
 
+                  <div className="grid md:grid-cols-2 gap-4 mb-4">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-red-800 mb-2">❌ JSON Inválido</h4>
+                      <pre className="bg-red-100 p-2 rounded text-xs mb-2">
+                        <code>{`{
+  "documentUrl": "https://example.com/doc.pdf"
+  // ❌ Falta printerId - Error 400
+}`}</code>
+                      </pre>
+                      <ul className="text-sm text-red-700 space-y-1 list-disc pl-4">
+                        <li><strong>printerId</strong> es obligatorio</li>
+                        <li><strong>documentUrl</strong> es obligatorio</li>
+                        <li>La API retorna error 400 Bad Request</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-green-800 mb-2">✅ Defaults Aplicados</h4>
+                      <pre className="bg-green-100 p-2 rounded text-xs mb-2">
+                        <code>{`{
+  "printerId": 1,
+  "documentUrl": "https://example.com/doc.pdf"
+  // ✅ Todo lo demás usa defaults
+}`}</code>
+                      </pre>
+                      <ul className="text-sm text-green-700 space-y-1 list-disc pl-4">
+                        <li><strong>copies:</strong> 1</li>
+                        <li><strong>duplex:</strong> false</li>
+                        <li><strong>orientation:</strong> "portrait"</li>
+                        <li><strong>margins:</strong> 6.35mm todos los lados</li>
+                        <li><strong>colorType:</strong> "color"</li>
+                        <li><strong>density:</strong> 300 DPI</li>
+                      </ul>
+                    </div>
+                  </div>
+
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Consideraciones Importantes</h4>
                     <ul className="text-sm text-yellow-700 space-y-1 list-disc pl-4">
@@ -681,6 +755,7 @@ const ApiDocs: React.FC = () => {
                       <li><strong>Formatos:</strong> Principalmente PDF, también soporta imágenes comunes</li>
                       <li><strong>Transparencias:</strong> Si el PDF tiene problemas, usar <code>"rasterize": true</code></li>
                       <li><strong>Fuentes:</strong> Para fuentes especiales usar <code>"altFontRendering": true</code></li>
+                      <li><strong>Defaults:</strong> Los valores por defecto están optimizados para la mayoría de casos</li>
                     </ul>
                   </div>
                 </div>
