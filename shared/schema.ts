@@ -143,26 +143,51 @@ export const numericPrinterJobRequestSchema = z.object({
   printerId: z.number().int().positive(),
   documentUrl: z.string().url(),
   documentName: z.string().optional(),
-  copies: z.number().int().positive().default(1),
-  duplex: z.boolean().default(false),
-  orientation: z.enum(["portrait", "landscape"]).default("portrait"),
+  copies: z.number().int().min(1).max(999).optional().default(1),
+  duplex: z.boolean().optional().default(false),
+  orientation: z.enum(['portrait', 'landscape', 'reverse-portrait', 'reverse-landscape']).optional().default('portrait'),
   margins: z.object({
-    top: z.number().optional(),
-    right: z.number().optional(),
-    bottom: z.number().optional(),
-    left: z.number().optional(),
+    top: z.number().min(0).optional(),
+    right: z.number().min(0).optional(),
+    bottom: z.number().min(0).optional(),
+    left: z.number().min(0).optional()
   }).optional(),
-  // Opciones adicionales de impresión
   options: z.object({
-    ignoreTransparency: z.boolean().default(true),
-    altFontRendering: z.boolean().default(true),
+    ignoreTransparency: z.boolean().optional(),
+    altFontRendering: z.boolean().optional(),
     pageRanges: z.string().optional(),
     scaleContent: z.boolean().optional(),
     rasterize: z.boolean().optional(),
-    interpolation: z.string().optional(),
-    colorType: z.string().optional(),
-    density: z.union([z.string(), z.number()]).optional(),
+    colorType: z.enum(['color', 'grayscale', 'blackwhite']).optional(),
+    density: z.number().min(72).max(1200).optional(),
+    interpolation: z.enum(['nearest', 'bilinear', 'bicubic', 'lanczos']).optional()
+  }).optional()
+});
+
+// Nuevo schema para trabajos de impresión con Base64
+export const base64PrintJobRequestSchema = z.object({
+  printerId: z.number().int().positive(),
+  documentBase64: z.string().min(1, "El documento Base64 es requerido"),
+  documentName: z.string().min(1, "El nombre del documento es requerido"),
+  copies: z.number().int().min(1).max(999).optional().default(1),
+  duplex: z.boolean().optional().default(false),
+  orientation: z.enum(['portrait', 'landscape', 'reverse-portrait', 'reverse-landscape']).optional().default('portrait'),
+  margins: z.object({
+    top: z.number().min(0).optional(),
+    right: z.number().min(0).optional(),
+    bottom: z.number().min(0).optional(),
+    left: z.number().min(0).optional()
   }).optional(),
+  options: z.object({
+    ignoreTransparency: z.boolean().optional(),
+    altFontRendering: z.boolean().optional(),
+    pageRanges: z.string().optional(),
+    scaleContent: z.boolean().optional(),
+    rasterize: z.boolean().optional(),
+    colorType: z.enum(['color', 'grayscale', 'blackwhite']).optional(),
+    density: z.number().min(72).max(1200).optional(),
+    interpolation: z.enum(['nearest', 'bilinear', 'bicubic', 'lanczos']).optional()
+  }).optional()
 });
 
 // Types - Existentes

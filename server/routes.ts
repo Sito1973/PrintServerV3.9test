@@ -13,6 +13,7 @@ import {
   printJobRequestSchema,
   simplePrintJobRequestSchema,
   numericPrinterJobRequestSchema,
+  base64PrintJobRequestSchema,
   insertUserSchema, 
   insertPrinterSchema
 } from "@shared/schema";
@@ -791,6 +792,179 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error("❌ Error en /api/print-id:", error);
+      handleValidationError(error, res);
+    }
+  });
+
+  // Endpoint para imprimir con datos Base64 - PROCESAMIENTO INMEDIATO
+  app.post("/api/print-base64", async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+
+    try {
+      // Validar API Key
+      const user = await validateApiKey(req, res);
+      if (!user) return;
+
+      // Parsear datos usando el nuevo schema
+      const printData = base64PrintJobRequestSchema.parse(req.body);
+
+      console.log(`📄 [BASE64] ========== PROCESANDO DOCUMENTO BASE64 ==========`);
+      console.log(`👤 [BASE64] Usuario: ${user.username} (ID: ${user.id})`);
+      console.log(`🖨️ [BASE64] Impresora ID: ${printData.printerId}`);
+      console.log(`📋 [BASE64] Documento: ${printData.documentName}`);
+      console.log(`📊 [BASE64] Tamaño Base64: ${printData.documentBase64.length} caracteres`);
+
+      // Buscar impresora
+      const printer = await storage.getPrinter(printData.printerId);
+      if (!printer) {
+        return res.status(404).json({ message: "Impresora no encontrada" });
+      }
+
+      if (printer.status === 'offline') {
+        return res.status(400).json({ message: "Impresora está desconectada" });
+      }
+
+      console.log(`✅ [BASE64] Impresora encontrada: ${printer.name} (${printer.uniqueId})`);
+
+      // Validar que el Base64 sea válido (opcional pero recomendado)
+      try {
+        // Verificar que sea un Base64 válido
+        const base64Pattern = /^[A-Za-z0-9+/]*={0,2}$/;
+        if (!base64Pattern.test(printData.documentBase64)) {
+          return res.status(400).json({ message: "Formato Base64 inválido" });
+        }
+
+        // Verificar que tenga un tamaño mínimo razonable
+        if (printData.documentBase64.length < 100) {
+          return res.status(400).json({ message: "El documento Base64 parece ser demasiado pequeño" });
+        }
+
+        console.log(`✅ [BASE64] Validación de formato completada`);
+      } catch (validationError) {
+        console.error(`❌ [BASE64] Error validando Base64:`, validationError);
+        return res.status(400).json({ message: "Documento Base64 inválido" });
+      }
+
+      // Crear trabajo con estado inicial optimizado
+      const printJob = await storage.createPrintJob({
+        documentUrl: `data:application/pdf;base64,${printData.documentBase64}`, // Guardar como data URL para referencia
+        documentName: printData.documentName,
+        printerId: printer.id,
+        userId: user.id,
+        copies: printData.copies,
+        duplex: printData.duplex,
+        orientation: printData.orientation
+      });
+
+      console.log(`📝 [BASE64] Trabajo creado con ID: ${printJob.id}`);
+
+      // PROCESAMIENTO SÍNCRONO INMEDIATO
+      // Preparar datos QZ para Base64
+      const qzData = {
+        printer: printer.name,
+        data: [{
+          type: 'pixel',
+          format: 'pdf',
+          flavor: 'base64', // Usar base64 en lugar de file
+          data: printData.documentBase64, // Datos Base64 directos
+          options: {
+            orientation: printData.orientation || 'portrait',
+            copies: printData.copies || 1,
+            duplex: printData.duplex || false,
+            ignoreTransparency: printData.options?.ignoreTransparency ?? true,
+            altFontRendering: printData.options?.altFontRendering ?? true,
+            ...(printData.options?.pageRanges && { pageRanges: printData.options.pageRanges }),
+            ...(printData.options?.scaleContent !== undefined && { scaleContent: printData.options.scaleContent }),
+            ...(printData.options?.rasterize !== undefined && { rasterize: printData.options.rasterize }),
+            ...(printData.options?.interpolation && { interpolation: printData.options.interpolation }),
+            ...(printData.options?.colorType && { colorType: printData.options.colorType }),
+          }
+        }],
+        config: {
+          jobName: `${printData.documentName} - ID: ${printJob.id}`,
+          units: 'mm',
+          ...(printData.options?.density !== undefined && { density: printData.options.density }),
+          ...(printData.options?.colorType && { colorType: printData.options.colorType }),
+          ...(printData.options?.interpolation && { interpolation: printData.options.interpolation }),
+          ...(printData.options?.scaleContent !== undefined && { scaleContent: printData.options.scaleContent }),
+          ...(printData.options?.rasterize !== undefined && { rasterize: printData.options.rasterize }),
+        }
+      };
+
+      // Configurar márgenes desde la solicitud JSON o usar valores por defecto
+      qzData.config.margins = printData.margins || {
+        top: 12.7,   // milímetros por defecto (equivalente a 0.5 pulgadas)
+        right: 12.7,
+        bottom: 12.7,
+        left: 12.7
+      };
+
+      console.log(`🔧 [BASE64] Configuración QZ preparada para impresora: ${printer.name}`);
+
+      // Actualizar inmediatamente a listo
+      await storage.updatePrintJob(printJob.id, { 
+        status: 'ready_for_client',
+        qzTrayData: JSON.stringify(qzData)
+      });
+
+      console.log(`✅ [BASE64] Trabajo ${printJob.id} marcado como ready_for_client`);
+
+      // Notificar vía WebSocket SOLO AL USUARIO DUEÑO
+      if (socketServer) {
+        const jobData = {
+          id: printJob.id,
+          documentName: printData.documentName,
+          documentUrl: `[BASE64-${printData.documentBase64.length}chars]`, // No enviar Base64 completo en notificación
+          printerName: printer.name,
+          printerUniqueId: printer.uniqueId,
+          status: 'ready_for_client',
+          copies: printData.copies,
+          duplex: printData.duplex,
+          orientation: printData.orientation,
+          qzTrayData: qzData,
+          timestamp: Date.now(),
+          isBase64: true // Flag para identificar trabajos Base64
+        };
+
+        // Obtener el socket específico del usuario
+        const userSocketId = (global as any).getUserSocket?.(user.id.toString());
+
+        console.log(`🔍 [BASE64-NOTIF] ========== VERIFICANDO NOTIFICACIÓN ==========`);
+        console.log(`👤 [BASE64-NOTIF] Usuario: ${user.username} (ID: ${user.id})`);
+        console.log(`🔌 [BASE64-NOTIF] Socket ID obtenido: ${userSocketId || 'NINGUNO'}`);
+
+        if (userSocketId) {
+          socketServer.to(userSocketId).emit('new-print-job', jobData);
+          console.log(`📡 [BASE64-NOTIF] ✅ Trabajo Base64 ${printJob.id} notificado EXITOSAMENTE al usuario ${user.username}`);
+        } else {
+          console.log(`⚠️ [BASE64-NOTIF] ❌ Usuario ${user.username} NO CONECTADO VIA WEBSOCKET`);
+          console.log(`🔄 [BASE64-NOTIF] Trabajo ${printJob.id} se procesará por polling (modo fallback)`);
+        }
+      }
+
+      // Respuesta inmediata
+      res.status(201).json({
+        success: true,
+        jobId: printJob.id,
+        status: 'ready_for_client',
+        immediate_processing: true,
+        message: 'Documento Base64 listo para impresión inmediata',
+        printer: {
+          id: printer.id,
+          name: printer.name,
+          status: printer.status
+        },
+        document: {
+          name: printData.documentName,
+          type: 'base64',
+          size: `${printData.documentBase64.length} caracteres`
+        }
+      });
+
+      console.log(`🎉 [BASE64] ========== PROCESAMIENTO BASE64 COMPLETADO ==========`);
+
+    } catch (error) {
+      console.error("❌ Error en /api/print-base64:", error);
       handleValidationError(error, res);
     }
   });

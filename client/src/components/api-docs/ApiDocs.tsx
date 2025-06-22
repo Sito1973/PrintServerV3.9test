@@ -513,6 +513,23 @@ const ApiDocs: React.FC = () => {
                   readOnly
                 />
               </div>
+              <p className="mt-1 text-sm text-gray-500">Imprime documentos desde URL pública</p>
+            </div>
+
+            {/* Base64 Print */}
+            <div>
+              <div className="flex rounded-md shadow-sm">
+                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-purple-50 text-purple-700 text-sm">
+                  POST
+                </span>
+                <Input
+                  className="flex-1 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300"
+                  value="/api/print-base64"
+                  readOnly
+                />
+              </div>
+              <p className="mt-1 text-sm text-gray-500">Imprime documentos desde datos Base64</p>
+            </div>
               <p className="text-sm text-muted-foreground mb-4">
                   Envía un documento para imprimir en la impresora especificada. Acepta todas las opciones de configuración de QZ Tray.
                 </p>
@@ -757,6 +774,140 @@ const ApiDocs: React.FC = () => {
                       <li><strong>Fuentes:</strong> Para fuentes especiales usar <code>"altFontRendering": true</code></li>
                       <li><strong>Defaults:</strong> Los valores por defecto están optimizados para la mayoría de casos</li>
                     </ul>
+                  </div>
+                </div>
+
+                {/* Base64 Endpoint Documentation */}
+                <div className="mt-8 bg-purple-50 border border-purple-200 rounded-lg p-6">
+                  <h4 className="font-semibold text-purple-800 mb-4">🆕 Nuevo Endpoint: Impresión con Base64</h4>
+                  
+                  <div className="bg-purple-100 p-4 rounded-lg mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-700 text-white">
+                        POST
+                      </span>
+                      <code className="text-sm font-mono">/api/print-base64</code>
+                    </div>
+                    <p className="text-sm text-purple-700">
+                      <strong>✨ Novedad:</strong> Imprime documentos PDF directamente desde datos Base64, 
+                      sin necesidad de URLs públicas.
+                    </p>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h5 className="font-semibold text-purple-800 mb-2">📋 Ejemplo Completo Base64</h5>
+                      <pre className="bg-purple-100 p-3 rounded text-xs overflow-x-auto">
+                        <code>{`{
+  "printerId": 1,
+  "documentBase64": "JVBERi0xLjMKJeHp69ICMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovT3V0bGluZXMgMiAwIFIKL1BhZ2VzIDMgMCBSCj4+CmVuZG9iago...",
+  "documentName": "Factura_2024_001.pdf",
+  "copies": 2,
+  "duplex": true,
+  "orientation": "portrait",
+  "margins": {
+    "top": 15,
+    "right": 15,
+    "bottom": 15,
+    "left": 15
+  },
+  "options": {
+    "colorType": "color",
+    "density": 300,
+    "scaleContent": true,
+    "rasterize": false
+  }
+}`}</code>
+                      </pre>
+                    </div>
+
+                    <div>
+                      <h5 className="font-semibold text-purple-800 mb-2">📤 Respuesta del Servidor</h5>
+                      <pre className="bg-green-50 border border-green-200 p-3 rounded text-xs overflow-x-auto">
+                        <code>{`{
+  "success": true,
+  "jobId": 42,
+  "status": "ready_for_client",
+  "immediate_processing": true,
+  "message": "Documento Base64 listo para impresión inmediata",
+  "printer": {
+    "id": 1,
+    "name": "HP LaserJet Pro",
+    "status": "online"
+  },
+  "document": {
+    "name": "Factura_2024_001.pdf",
+    "type": "base64",
+    "size": "2048 caracteres"
+  }
+}`}</code>
+                      </pre>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid md:grid-cols-2 gap-4">
+                    <div className="bg-green-50 border border-green-200 rounded p-4">
+                      <h5 className="font-semibold text-green-800 mb-2">✅ Ventajas del Base64</h5>
+                      <ul className="text-sm text-green-700 space-y-1 list-disc pl-4">
+                        <li>No requiere URLs públicas</li>
+                        <li>Documentos privados y seguros</li>
+                        <li>Procesamiento inmediato</li>
+                        <li>Compatible con todas las opciones QZ Tray</li>
+                        <li>Ideal para formularios web</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-amber-50 border border-amber-200 rounded p-4">
+                      <h5 className="font-semibold text-amber-800 mb-2">⚠️ Consideraciones</h5>
+                      <ul className="text-sm text-amber-700 space-y-1 list-disc pl-4">
+                        <li>Tamaño máximo del JSON aumenta ~33%</li>
+                        <li>Validación automática del Base64</li>
+                        <li><code>documentName</code> es obligatorio</li>
+                        <li>Usar <code>flavor: "base64"</code> en QZ Tray</li>
+                        <li>Perfecto para documentos generados dinámicamente</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 bg-blue-50 border border-blue-200 rounded p-4">
+                    <h5 className="font-semibold text-blue-800 mb-2">💡 Ejemplo de Uso en JavaScript</h5>
+                    <pre className="bg-blue-100 p-3 rounded text-xs overflow-x-auto">
+                      <code>{`// Convertir archivo a Base64
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      // Remover prefijo "data:application/pdf;base64,"
+      const base64 = reader.result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = error => reject(error);
+  });
+};
+
+// Enviar a impresión
+const printFile = async (file, printerId) => {
+  const documentBase64 = await fileToBase64(file);
+  
+  const response = await fetch('/api/print-base64', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey
+    },
+    body: JSON.stringify({
+      printerId: printerId,
+      documentBase64: documentBase64,
+      documentName: file.name,
+      copies: 1,
+      orientation: "portrait"
+    })
+  });
+  
+  return response.json();
+};`}</code>
+                    </pre>
                   </div>
                 </div>
             </div>
