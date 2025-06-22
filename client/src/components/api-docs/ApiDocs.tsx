@@ -801,6 +801,11 @@ const ApiDocs: React.FC = () => {
   "copies": 2,
   "duplex": true,
   "orientation": "portrait",
+  "size": {
+    "width": 2.25,
+    "height": 1.25,
+    "units": "in"
+  },
   "margins": {
     "top": 15,
     "right": 15,
@@ -861,6 +866,17 @@ const ApiDocs: React.FC = () => {
                     <li><code>documentName</code> es obligatorio</li>
                     <li>Usar <code>flavor: "base64"</code> en QZ Tray</li>
                     <li>Perfecto para documentos generados dinámicamente</li>
+                  </ul>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded p-4">
+                  <h5 className="font-semibold text-blue-800 mb-2">📏 Parámetro Size (Nuevo)</h5>
+                  <ul className="text-sm text-blue-700 space-y-1 list-disc pl-4">
+                    <li><strong>width/height:</strong> Dimensiones del papel</li>
+                    <li><strong>units:</strong> "in" (pulgadas), "mm" (milímetros), "cm" (centímetros)</li>
+                    <li><strong>Ejemplo Dymo:</strong> {"{ width: 2.25, height: 1.25, units: \"in\" }"}</li>
+                    <li><strong>Ejemplo A4:</strong> {"{ width: 210, height: 297, units: \"mm\" }"}</li>
+                    <li><strong>Ejemplo Ticket:</strong> {"{ width: 80, height: 200, units: \"mm\" }"}</li>
                   </ul>
                 </div>
               </div>

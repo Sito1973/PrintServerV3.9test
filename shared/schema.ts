@@ -166,27 +166,32 @@ export const numericPrinterJobRequestSchema = z.object({
 
 // Nuevo schema para trabajos de impresión con Base64
 export const base64PrintJobRequestSchema = z.object({
-  printerId: z.number().int().positive(),
-  documentBase64: z.string().min(1, "El documento Base64 es requerido"),
-  documentName: z.string().min(1, "El nombre del documento es requerido"),
-  copies: z.number().int().min(1).max(999).optional().default(1),
+  printerId: z.number().positive(),
+  documentBase64: z.string().min(1),
+  documentName: z.string().min(1),
+  copies: z.number().positive().optional().default(1),
   duplex: z.boolean().optional().default(false),
-  orientation: z.enum(['portrait', 'landscape', 'reverse-portrait', 'reverse-landscape']).optional().default('portrait'),
+  orientation: z.enum(['portrait', 'landscape']).optional().default('portrait'),
   margins: z.object({
-    top: z.number().min(0).optional(),
-    right: z.number().min(0).optional(),
-    bottom: z.number().min(0).optional(),
-    left: z.number().min(0).optional()
+    top: z.number().optional(),
+    right: z.number().optional(),
+    bottom: z.number().optional(),
+    left: z.number().optional()
+  }).optional(),
+  size: z.object({
+    width: z.number().positive(),
+    height: z.number().positive(),
+    units: z.enum(['in', 'mm', 'cm']).optional().default('in')
   }).optional(),
   options: z.object({
+    pageRanges: z.string().optional(),
     ignoreTransparency: z.boolean().optional(),
     altFontRendering: z.boolean().optional(),
-    pageRanges: z.string().optional(),
     scaleContent: z.boolean().optional(),
     rasterize: z.boolean().optional(),
-    colorType: z.enum(['color', 'grayscale', 'blackwhite']).optional(),
-    density: z.number().min(72).max(1200).optional(),
-    interpolation: z.enum(['nearest', 'bilinear', 'bicubic', 'lanczos']).optional()
+    interpolation: z.string().optional(),
+    colorType: z.string().optional(),
+    density: z.union([z.string(), z.number()]).optional()
   }).optional()
 });
 

@@ -882,7 +882,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }],
         config: {
           jobName: `${printData.documentName} - ID: ${printJob.id}`,
-          units: 'mm',
+          units: printData.size?.units || 'mm',
+          ...(printData.size && { 
+            size: { 
+              width: printData.size.width, 
+              height: printData.size.height 
+            } 
+          }),
           ...(printData.options?.density !== undefined && { density: printData.options.density }),
           ...(printData.options?.colorType && { colorType: printData.options.colorType }),
           ...(printData.options?.interpolation && { interpolation: printData.options.interpolation }),
