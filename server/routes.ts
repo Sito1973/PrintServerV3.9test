@@ -864,7 +864,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         printer: printer.name,
         data: [{
           type: 'pixel',
-          format: 'pdf',
+          format: 'image',
           flavor: 'base64', // Usar base64 en lugar de file
           data: printData.documentBase64, // Datos Base64 directos
           options: {
