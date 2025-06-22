@@ -347,43 +347,29 @@ const ApiDocs: React.FC = () => {
     document.body.removeChild(a);
   };
 
+  // Ejemplo con comentarios separados para mejor legibilidad
   const printJobExample = `{
   "printerId": 1,
   "documentUrl": "https://example.com/document.pdf",
   "documentName": "Documento de prueba",
-
-  // ========== CONFIGURACIÓN BÁSICA ==========
-  "copies": 2,                    // Número de copias (1-999)
-  "duplex": true,                 // Impresión a doble cara automática
-  "orientation": "portrait",      // Orientación del papel
-
-  // ========== MÁRGENES EN MILÍMETROS ==========
+  "copies": 2,
+  "duplex": true,
+  "orientation": "portrait",
   "margins": {
-    "top": 15,                    // Margen superior (mm) - Default: 6.35mm (0.25")
-    "right": 15,                  // Margen derecho (mm)
-    "bottom": 15,                 // Margen inferior (mm)
-    "left": 15                    // Margen izquierdo (mm)
+    "top": 15,
+    "right": 15,
+    "bottom": 15,
+    "left": 15
   },
-
-  // ========== OPCIONES AVANZADAS QZ TRAY ==========
   "options": {
-    // Control de transparencias y renderizado
-    "ignoreTransparency": false,  // Procesar transparencias PDF correctamente
-    "altFontRendering": true,     // Usar renderizado alternativo para fuentes problemáticas
-    "rasterize": false,           // false=Vector PDF, true=Convertir a imagen bitmap
-
-    // Selección de páginas
-    "pageRanges": "1-5",          // Páginas específicas: "1-5", "1,3,5", "2-", "all"
-    
-    // Escalado y ajuste
-    "scaleContent": true,         // Escalar automáticamente al tamaño de papel
-    
-    // Calidad y color
-    "colorType": "grayscale",     // color, grayscale, blackwhite
-    "density": 600,               // DPI de impresión (72-1200) - Afecta calidad
-    
-    // Interpolación para imágenes (opcional)
-    "interpolation": "bicubic"    // nearest, bilinear, bicubic, lanczos
+    "ignoreTransparency": false,
+    "altFontRendering": true,
+    "rasterize": false,
+    "pageRanges": "1-5",
+    "scaleContent": true,
+    "colorType": "grayscale",
+    "density": 600,
+    "interpolation": "bicubic"
   }
 }`;
 
@@ -530,137 +516,147 @@ const ApiDocs: React.FC = () => {
               </div>
               <p className="mt-1 text-sm text-gray-500">Imprime documentos desde datos Base64</p>
             </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                  Envía un documento para imprimir en la impresora especificada. Acepta todas las opciones de configuración de QZ Tray.
-                </p>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <h4 className="font-semibold text-blue-800 mb-3">📋 Guía Completa de Configuraciones QZ Tray</h4>
-                  
-                  <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-700">
-                    <div>
-                      <h5 className="font-semibold mb-1">🔄 Orientación del Papel</h5>
-                      <ul className="text-xs space-y-0.5 pl-2">
-                        <li>• <code>"portrait"</code> - Vertical (predeterminado)</li>
-                        <li>• <code>"landscape"</code> - Horizontal</li>
-                        <li>• <code>"reverse-portrait"</code> - Vertical invertido</li>
-                        <li>• <code>"reverse-landscape"</code> - Horizontal invertido</li>
-                      </ul>
-                    </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Envía un documento para imprimir en la impresora especificada. Acepta todas las opciones de configuración de QZ Tray.
+            </p>
 
-                    <div>
-                      <h5 className="font-semibold mb-1">🎨 Tipos de Color</h5>
-                      <ul className="text-xs space-y-0.5 pl-2">
-                        <li>• <code>"color"</code> - Impresión a color completo</li>
-                        <li>• <code>"grayscale"</code> - Escala de grises</li>
-                        <li>• <code>"blackwhite"</code> - Solo blanco y negro</li>
-                      </ul>
-                    </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <h4 className="font-semibold text-blue-800 mb-3">📋 Guía Completa de Configuraciones QZ Tray</h4>
 
-                    <div>
-                      <h5 className="font-semibold mb-1">📄 Selección de Páginas</h5>
-                      <ul className="text-xs space-y-0.5 pl-2">
-                        <li>• <code>"all"</code> - Todas las páginas</li>
-                        <li>• <code>"1-5"</code> - Páginas del 1 al 5</li>
-                        <li>• <code>"1,3,5"</code> - Páginas específicas</li>
-                        <li>• <code>"2-"</code> - Desde la página 2 hasta el final</li>
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h5 className="font-semibold mb-1">⚙️ Calidad de Impresión</h5>
-                      <ul className="text-xs space-y-0.5 pl-2">
-                        <li>• <code>density: 300</code> - Calidad estándar</li>
-                        <li>• <code>density: 600</code> - Alta calidad</li>
-                        <li>• <code>density: 1200</code> - Máxima calidad</li>
-                        <li>• Rango: 72-1200 DPI</li>
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h5 className="font-semibold mb-1">📏 Márgenes</h5>
-                      <ul className="text-xs space-y-0.5 pl-2">
-                        <li>• Valores en <strong>milímetros</strong></li>
-                        <li>• Default: 6.35mm (≈ 0.25 pulgadas)</li>
-                        <li>• Mínimo recomendado: 5mm</li>
-                      </ul>
-                    </div>
-
-                    <div>
-                      <h5 className="font-semibold mb-1">🔧 Opciones Avanzadas</h5>
-                      <ul className="text-xs space-y-0.5 pl-2">
-                        <li>• <code>rasterize: false</code> - Mantener vectores PDF</li>
-                        <li>• <code>scaleContent: true</code> - Ajustar al papel</li>
-                        <li>• <code>altFontRendering</code> - Fuentes problemáticas</li>
-                        <li>• <code>ignoreTransparency</code> - Control de transparencias</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 p-2 bg-blue-100 rounded text-xs">
-                    <strong>💡 Tip:</strong> Para documentos complejos usa <code>rasterize: true</code> y <code>density: 300</code>. 
-                    Para texto simple mantén <code>rasterize: false</code> para mejor calidad.
-                  </div>
+              <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-700">
+                <div>
+                  <h5 className="font-semibold mb-1">🔄 Orientación del Papel</h5>
+                  <ul className="text-xs space-y-0.5 pl-2">
+                    <li>• <code>"portrait"</code> - Vertical (predeterminado)</li>
+                    <li>• <code>"landscape"</code> - Horizontal</li>
+                    <li>• <code>"reverse-portrait"</code> - Vertical invertido</li>
+                    <li>• <code>"reverse-landscape"</code> - Horizontal invertido</li>
+                  </ul>
                 </div>
-              <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold mb-2">📖 Ejemplo Completo con Comentarios:</h4>
-                    <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
-                      <code>{printJobExample}</code>
-                    </pre>
-                  </div>
 
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-                    <h4 className="font-semibold text-amber-800 mb-3">🔧 Manejo de Valores Faltantes</h4>
-                    <div className="text-sm text-amber-700 space-y-2">
-                      <p><strong>✅ Valores Opcionales:</strong> Si no se incluyen, se usan valores predeterminados seguros</p>
-                      <p><strong>❌ Valores Requeridos:</strong> <code>printerId</code> y <code>documentUrl</code> - Error 400 si faltan</p>
-                      <p><strong>🔄 Compatibilidad:</strong> JSON mínimo o completo - ambos funcionan perfectamente</p>
-                    </div>
-                  </div>
+                <div>
+                  <h5 className="font-semibold mb-1">🎨 Tipos de Color</h5>
+                  <ul className="text-xs space-y-0.5 pl-2">
+                    <li>• <code>"color"</code> - Impresión a color completo</li>
+                    <li>• <code>"grayscale"</code> - Escala de grises</li>
+                    <li>• <code>"blackwhite"</code> - Solo blanco y negro</li>
+                  </ul>
+                </div>
 
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                      <h4 className="font-semibold mb-2 text-blue-700">⚡ JSON Mínimo</h4>
-                      <p className="text-xs text-gray-600 mb-2">Solo valores esenciales</p>
-                      <pre className="bg-blue-50 border border-blue-200 p-3 rounded-lg overflow-x-auto text-xs">
-                        <code>{`{
+                <div>
+                  <h5 className="font-semibold mb-1">📄 Selección de Páginas</h5>
+                  <ul className="text-xs space-y-0.5 pl-2">
+                    <li>• <code>"all"</code> - Todas las páginas</li>
+                    <li>• <code>"1-5"</code> - Páginas del 1 al 5</li>
+                    <li>• <code>"1,3,5"</code> - Páginas específicas</li>
+                    <li>• <code>"2-"</code> - Desde la página 2 hasta el final</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h5 className="font-semibold mb-1">⚙️ Calidad de Impresión</h5>
+                  <ul className="text-xs space-y-0.5 pl-2">
+                    <li>• <code>density: 300</code> - Calidad estándar</li>
+                    <li>• <code>density: 600</code> - Alta calidad</li>
+                    <li>• <code>density: 1200</code> - Máxima calidad</li>
+                    <li>• Rango: 72-1200 DPI</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h5 className="font-semibold mb-1">📏 Márgenes</h5>
+                  <ul className="text-xs space-y-0.5 pl-2">
+                    <li>• Valores en <strong>milímetros</strong></li>
+                    <li>• Default: 6.35mm (≈ 0.25 pulgadas)</li>
+                    <li>• Mínimo recomendado: 5mm</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h5 className="font-semibold mb-1">🔧 Opciones Avanzadas</h5>
+                  <ul className="text-xs space-y-0.5 pl-2">
+                    <li>• <code>rasterize: false</code> - Mantener vectores PDF</li>
+                    <li>• <code>scaleContent: true</code> - Ajustar al papel</li>
+                    <li>• <code>altFontRendering</code> - Fuentes problemáticas</li>
+                    <li>• <code>ignoreTransparency</code> - Control de transparencias</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="mt-3 p-2 bg-blue-100 rounded text-xs">
+                <strong>💡 Tip:</strong> Para documentos complejos usa <code>rasterize: true</code> y <code>density: 300</code>. 
+                Para texto simple mantén <code>rasterize: false</code> para mejor calidad.
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <h4 className="font-semibold mb-2">📖 Ejemplo Completo con Comentarios:</h4>
+                <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+                  <code>{printJobExample}</code>
+                </pre>
+                {/* Comentarios del ejemplo aquí */}
+                <div className="mt-2 text-xs text-gray-600">
+                  <p><strong>Configuración básica:</strong> copies (1-999), duplex (true/false), orientation</p>
+                  <p><strong>Márgenes:</strong> en milímetros - Default: 6.35mm (0.25")</p>
+                  <p><strong>Opciones avanzadas QZ Tray:</strong> Control de transparencias, renderizado, escalado</p>
+                  <p><strong>Selección de páginas:</strong> "1-5", "1,3,5", "2-", "all"</p>
+                  <p><strong>Calidad y color:</strong> density (72-1200 DPI), colorType (color/grayscale/blackwhite)</p>
+                </div>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-amber-800 mb-3">🔧 Manejo de Valores Faltantes</h4>
+                <div className="text-sm text-amber-700 space-y-2">
+                  <p><strong>✅ Valores Opcionales:</strong> Si no se incluyen, se usan valores predeterminados seguros</p>
+                  <p><strong>❌ Valores Requeridos:</strong> <code>printerId</code> y <code>documentUrl</code> - Error 400 si faltan</p>
+                  <p><strong>🔄 Compatibilidad:</strong> JSON mínimo o completo - ambos funcionan perfectamente</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <h4 className="font-semibold mb-2 text-blue-700">⚡ JSON Mínimo</h4>
+                  <p className="text-xs text-gray-600 mb-2">Solo valores esenciales</p>
+                  <pre className="bg-blue-50 border border-blue-200 p-3 rounded-lg overflow-x-auto text-xs">
+                    <code>{`{
   "printerId": 1,
   "documentUrl": "https://example.com/doc.pdf"
 }`}</code>
-                      </pre>
-                      <div className="mt-2 text-xs text-blue-600">
-                        <p>✅ Funciona perfectamente</p>
-                        <p>📄 copies: 1 (default)</p>
-                        <p>🔄 orientation: "portrait"</p>
-                        <p>📏 márgenes: 6.35mm c/lado</p>
-                      </div>
-                    </div>
+                  </pre>
+                  <div className="mt-2 text-xs text-blue-600">
+                    <p>✅ Funciona perfectamente</p>
+                    <p>📄 copies: 1 (default)</p>
+                    <p>🔄 orientation: "portrait"</p>
+                    <p>📏 márgenes: 6.35mm c/lado</p>
+                  </div>
+                </div>
 
-                    <div>
-                      <h4 className="font-semibold mb-2 text-green-700">✅ Uso Básico</h4>
-                      <p className="text-xs text-gray-600 mb-2">Configuración común</p>
-                      <pre className="bg-green-50 border border-green-200 p-3 rounded-lg overflow-x-auto text-xs">
-                        <code>{`{
+                <div>
+                  <h4 className="font-semibold mb-2 text-green-700">✅ Uso Básico</h4>
+                  <p className="text-xs text-gray-600 mb-2">Configuración común</p>
+                  <pre className="bg-green-50 border border-green-200 p-3 rounded-lg overflow-x-auto text-xs">
+                    <code>{`{
   "printerId": 1,
   "documentUrl": "https://example.com/factura.pdf",
   "documentName": "Factura #001",
   "copies": 2,
   "orientation": "portrait"
 }`}</code>
-                      </pre>
-                      <div className="mt-2 text-xs text-green-600">
-                        <p>✅ Configuración estándar</p>
-                        <p>🔧 Usa defaults seguros</p>
-                        <p>⚡ Procesamiento rápido</p>
-                      </div>
-                    </div>
+                  </pre>
+                  <div className="mt-2 text-xs text-green-600">
+                    <p>✅ Configuración estándar</p>
+                    <p>🔧 Usa defaults seguros</p>
+                    <p>⚡ Procesamiento rápido</p>
+                  </div>
+                </div>
 
-                    <div>
-                      <h4 className="font-semibold mb-2 text-purple-700">🎯 Configuración Completa</h4>
-                      <p className="text-xs text-gray-600 mb-2">Todas las opciones</p>
-                      <pre className="bg-purple-50 border border-purple-200 p-3 rounded-lg overflow-x-auto text-xs">
-                        <code>{`{
+                <div>
+                  <h4 className="font-semibold mb-2 text-purple-700">🎯 Configuración Completa</h4>
+                  <p className="text-xs text-gray-600 mb-2">Todas las opciones</p>
+                  <pre className="bg-purple-50 border border-purple-200 p-3 rounded-lg overflow-x-auto text-xs">
+                    <code>{`{
   "printerId": 1,
   "documentUrl": "https://example.com/planos.pdf",
   "documentName": "Planos Arquitectónicos",
@@ -681,18 +677,18 @@ const ApiDocs: React.FC = () => {
     "rasterize": true
   }
 }`}</code>
-                      </pre>
-                      <div className="mt-2 text-xs text-purple-600">
-                        <p>⚙️ Control total</p>
-                        <p>🎯 Máxima precisión</p>
-                        <p>🔧 Para casos especiales</p>
-                      </div>
-                    </div>
+                  </pre>
+                  <div className="mt-2 text-xs text-purple-600">
+                    <p>⚙️ Control total</p>
+                    <p>🎯 Máxima precisión</p>
+                    <p>🔧 Para casos especiales</p>
+                  </div>
+                </div>
 
-                    <div>
-                      <h4 className="font-semibold mb-2 text-purple-700">📊 Reportes - Alta Calidad</h4>
-                      <pre className="bg-purple-50 border border-purple-200 p-3 rounded-lg overflow-x-auto text-xs">
-                        <code>{`{
+                <div>
+                  <h4 className="font-semibold mb-2 text-purple-700">📊 Reportes - Alta Calidad</h4>
+                  <pre className="bg-purple-50 border border-purple-200 p-3 rounded-lg overflow-x-auto text-xs">
+                    <code>{`{
   "printerId": 1,
   "documentUrl": "https://example.com/reporte.pdf",
   "documentName": "Reporte Mensual",
@@ -706,13 +702,13 @@ const ApiDocs: React.FC = () => {
     "interpolation": "bicubic"
   }
 }`}</code>
-                      </pre>
-                    </div>
+                  </pre>
+                </div>
 
-                    <div>
-                      <h4 className="font-semibold mb-2 text-orange-700">⚡ Impresión Rápida - Borrador</h4>
-                      <pre className="bg-orange-50 border border-orange-200 p-3 rounded-lg overflow-x-auto text-xs">
-                        <code>{`{
+                <div>
+                  <h4 className="font-semibold mb-2 text-orange-700">⚡ Impresión Rápida - Borrador</h4>
+                  <pre className="bg-orange-50 border border-orange-200 p-3 rounded-lg overflow-x-auto text-xs">
+                    <code>{`{
   "printerId": 1,
   "documentUrl": "https://example.com/borrador.pdf",
   "documentName": "Borrador de Trabajo",
@@ -724,81 +720,81 @@ const ApiDocs: React.FC = () => {
     "scaleContent": true
   }
 }`}</code>
-                      </pre>
-                    </div>
-                  </div>
+                  </pre>
+                </div>
+              </div>
 
-                  <div className="grid md:grid-cols-2 gap-4 mb-4">
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-red-800 mb-2">❌ JSON Inválido</h4>
-                      <pre className="bg-red-100 p-2 rounded text-xs mb-2">
-                        <code>{`{
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-red-800 mb-2">❌ JSON Inválido</h4>
+                  <pre className="bg-red-100 p-2 rounded text-xs mb-2">
+                    <code>{`{
   "documentUrl": "https://example.com/doc.pdf"
-  // ❌ Falta printerId - Error 400
 }`}</code>
-                      </pre>
-                      <ul className="text-sm text-red-700 space-y-1 list-disc pl-4">
-                        <li><strong>printerId</strong> es obligatorio</li>
-                        <li><strong>documentUrl</strong> es obligatorio</li>
-                        <li>La API retorna error 400 Bad Request</li>
-                      </ul>
-                    </div>
-
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-green-800 mb-2">✅ Defaults Aplicados</h4>
-                      <pre className="bg-green-100 p-2 rounded text-xs mb-2">
-                        <code>{`{
-  "printerId": 1,
-  "documentUrl": "https://example.com/doc.pdf"
-  // ✅ Todo lo demás usa defaults
-}`}</code>
-                      </pre>
-                      <ul className="text-sm text-green-700 space-y-1 list-disc pl-4">
-                        <li><strong>copies:</strong> 1</li>
-                        <li><strong>duplex:</strong> false</li>
-                        <li><strong>orientation:</strong> "portrait"</li>
-                        <li><strong>margins:</strong> 6.35mm todos los lados</li>
-                        <li><strong>colorType:</strong> "color"</li>
-                        <li><strong>density:</strong> 300 DPI</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Consideraciones Importantes</h4>
-                    <ul className="text-sm text-yellow-700 space-y-1 list-disc pl-4">
-                      <li><strong>URLs:</strong> Deben ser accesibles públicamente (no localhost)</li>
-                      <li><strong>Tamaño:</strong> Archivos grandes pueden tardar más en procesarse</li>
-                      <li><strong>Formatos:</strong> Principalmente PDF, también soporta imágenes comunes</li>
-                      <li><strong>Transparencias:</strong> Si el PDF tiene problemas, usar <code>"rasterize": true</code></li>
-                      <li><strong>Fuentes:</strong> Para fuentes especiales usar <code>"altFontRendering": true</code></li>
-                      <li><strong>Defaults:</strong> Los valores por defecto están optimizados para la mayoría de casos</li>
-                    </ul>
-                  </div>
+                  </pre>
+                  <p className="text-xs text-red-600">❌ Falta printerId - Error 400</p>
+                  <ul className="text-sm text-red-700 space-y-1 list-disc pl-4">
+                    <li><strong>printerId</strong> es obligatorio</li>
+                    <li><strong>documentUrl</strong> es obligatorio</li>
+                    <li>La API retorna error 400 Bad Request</li>
+                  </ul>
                 </div>
 
-                {/* Base64 Endpoint Documentation */}
-                <div className="mt-8 bg-purple-50 border border-purple-200 rounded-lg p-6">
-                  <h4 className="font-semibold text-purple-800 mb-4">🆕 Nuevo Endpoint: Impresión con Base64</h4>
-                  
-                  <div className="bg-purple-100 p-4 rounded-lg mb-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-700 text-white">
-                        POST
-                      </span>
-                      <code className="text-sm font-mono">/api/print-base64</code>
-                    </div>
-                    <p className="text-sm text-purple-700">
-                      <strong>✨ Novedad:</strong> Imprime documentos PDF directamente desde datos Base64, 
-                      sin necesidad de URLs públicas.
-                    </p>
-                  </div>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-green-800 mb-2">✅ Defaults Aplicados</h4>
+                  <pre className="bg-green-100 p-2 rounded text-xs mb-2">
+                    <code>{`{
+  "printerId": 1,
+  "documentUrl": "https://example.com/doc.pdf"
+}`}</code>
+                  </pre>
+                  <p className="text-xs text-green-600">✅ Todo lo demás usa defaults</p>
+                  <ul className="text-sm text-green-700 space-y-1 list-disc pl-4">
+                    <li><strong>copies:</strong> 1</li>
+                    <li><strong>duplex:</strong> false</li>
+                    <li><strong>orientation:</strong> "portrait"</li>
+                    <li><strong>margins:</strong> 6.35mm todos los lados</li>
+                    <li><strong>colorType:</strong> "color"</li>
+                    <li><strong>density:</strong> 300 DPI</li>
+                  </ul>
+                </div>
+              </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <h5 className="font-semibold text-purple-800 mb-2">📋 Ejemplo Completo Base64</h5>
-                      <pre className="bg-purple-100 p-3 rounded text-xs overflow-x-auto">
-                        <code>{`{
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Consideraciones Importantes</h4>
+                <ul className="text-sm text-yellow-700 space-y-1 list-disc pl-4">
+                  <li><strong>URLs:</strong> Deben ser accesibles públicamente (no localhost)</li>
+                  <li><strong>Tamaño:</strong> Archivos grandes pueden tardar más en procesarse</li>
+                  <li><strong>Formatos:</strong> Principalmente PDF, también soporta imágenes comunes</li>
+                  <li><strong>Transparencias:</strong> Si el PDF tiene problemas, usar <code>"rasterize": true</code></li>
+                  <li><strong>Fuentes:</strong> Para fuentes especiales usar <code>"altFontRendering": true</code></li>
+                  <li><strong>Defaults:</strong> Los valores por defecto están optimizados para la mayoría de casos</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Base64 Endpoint Documentation */}
+            <div className="mt-8 bg-purple-50 border border-purple-200 rounded-lg p-6">
+              <h4 className="font-semibold text-purple-800 mb-4">🆕 Nuevo Endpoint: Impresión con Base64</h4>
+
+              <div className="bg-purple-100 p-4 rounded-lg mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-700 text-white">
+                    POST
+                  </span>
+                  <code className="text-sm font-mono">/api/print-base64</code>
+                </div>
+                <p className="text-sm text-purple-700">
+                  <strong>✨ Novedad:</strong> Imprime documentos PDF directamente desde datos Base64, 
+                  sin necesidad de URLs públicas.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h5 className="font-semibold text-purple-800 mb-2">📋 Ejemplo Completo Base64</h5>
+                  <pre className="bg-purple-100 p-3 rounded text-xs overflow-x-auto">
+                    <code>{`{
   "printerId": 1,
   "documentBase64": "JVBERi0xLjMKJeHp69ICMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovT3V0bGluZXMgMiAwIFIKL1BhZ2VzIDMgMCBSCj4+CmVuZG9iago...",
   "documentName": "Factura_2024_001.pdf",
@@ -818,13 +814,13 @@ const ApiDocs: React.FC = () => {
     "rasterize": false
   }
 }`}</code>
-                      </pre>
-                    </div>
+                  </pre>
+                </div>
 
-                    <div>
-                      <h5 className="font-semibold text-purple-800 mb-2">📤 Respuesta del Servidor</h5>
-                      <pre className="bg-green-50 border border-green-200 p-3 rounded text-xs overflow-x-auto">
-                        <code>{`{
+                <div>
+                  <h5 className="font-semibold text-purple-800 mb-2">📤 Respuesta del Servidor</h5>
+                  <pre className="bg-green-50 border border-green-200 p-3 rounded text-xs overflow-x-auto">
+                    <code>{`{
   "success": true,
   "jobId": 42,
   "status": "ready_for_client",
@@ -841,38 +837,38 @@ const ApiDocs: React.FC = () => {
     "size": "2048 caracteres"
   }
 }`}</code>
-                      </pre>
-                    </div>
-                  </div>
+                  </pre>
+                </div>
+              </div>
 
-                  <div className="mt-4 grid md:grid-cols-2 gap-4">
-                    <div className="bg-green-50 border border-green-200 rounded p-4">
-                      <h5 className="font-semibold text-green-800 mb-2">✅ Ventajas del Base64</h5>
-                      <ul className="text-sm text-green-700 space-y-1 list-disc pl-4">
-                        <li>No requiere URLs públicas</li>
-                        <li>Documentos privados y seguros</li>
-                        <li>Procesamiento inmediato</li>
-                        <li>Compatible con todas las opciones QZ Tray</li>
-                        <li>Ideal para formularios web</li>
-                      </ul>
-                    </div>
+              <div className="mt-4 grid md:grid-cols-2 gap-4">
+                <div className="bg-green-50 border border-green-200 rounded p-4">
+                  <h5 className="font-semibold text-green-800 mb-2">✅ Ventajas del Base64</h5>
+                  <ul className="text-sm text-green-700 space-y-1 list-disc pl-4">
+                    <li>No requiere URLs públicas</li>
+                    <li>Documentos privados y seguros</li>
+                    <li>Procesamiento inmediato</li>
+                    <li>Compatible con todas las opciones QZ Tray</li>
+                    <li>Ideal para formularios web</li>
+                  </ul>
+                </div>
 
-                    <div className="bg-amber-50 border border-amber-200 rounded p-4">
-                      <h5 className="font-semibold text-amber-800 mb-2">⚠️ Consideraciones</h5>
-                      <ul className="text-sm text-amber-700 space-y-1 list-disc pl-4">
-                        <li>Tamaño máximo del JSON aumenta ~33%</li>
-                        <li>Validación automática del Base64</li>
-                        <li><code>documentName</code> es obligatorio</li>
-                        <li>Usar <code>flavor: "base64"</code> en QZ Tray</li>
-                        <li>Perfecto para documentos generados dinámicamente</li>
-                      </ul>
-                    </div>
-                  </div>
+                <div className="bg-amber-50 border border-amber-200 rounded p-4">
+                  <h5 className="font-semibold text-amber-800 mb-2">⚠️ Consideraciones</h5>
+                  <ul className="text-sm text-amber-700 space-y-1 list-disc pl-4">
+                    <li>Tamaño máximo del JSON aumenta ~33%</li>
+                    <li>Validación automática del Base64</li>
+                    <li><code>documentName</code> es obligatorio</li>
+                    <li>Usar <code>flavor: "base64"</code> en QZ Tray</li>
+                    <li>Perfecto para documentos generados dinámicamente</li>
+                  </ul>
+                </div>
+              </div>
 
-                  <div className="mt-4 bg-blue-50 border border-blue-200 rounded p-4">
-                    <h5 className="font-semibold text-blue-800 mb-2">💡 Ejemplo de Uso en JavaScript</h5>
-                    <pre className="bg-blue-100 p-3 rounded text-xs overflow-x-auto">
-                      <code>{`// Convertir archivo a Base64
+              <div className="mt-4 bg-blue-50 border border-blue-200 rounded p-4">
+                <h5 className="font-semibold text-blue-800 mb-2">💡 Ejemplo de Uso en JavaScript</h5>
+                <pre className="bg-blue-100 p-3 rounded text-xs overflow-x-auto">
+                  <code>{`// Convertir archivo a Base64
 const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -889,7 +885,7 @@ const fileToBase64 = (file) => {
 // Enviar a impresión
 const printFile = async (file, printerId) => {
   const documentBase64 = await fileToBase64(file);
-  
+
   const response = await fetch('/api/print-base64', {
     method: 'POST',
     headers: {
@@ -904,12 +900,11 @@ const printFile = async (file, printerId) => {
       orientation: "portrait"
     })
   });
-  
+
   return response.json();
 };`}</code>
-                    </pre>
-                  </div>
-                </div>
+                </pre>
+              </div>
             </div>
 
             {/* Get Print Jobs */}
