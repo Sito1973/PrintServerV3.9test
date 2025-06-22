@@ -812,7 +812,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`👤 [BASE64] Usuario: ${user.username} (ID: ${user.id})`);
       console.log(`🖨️ [BASE64] Impresora ID: ${printData.printerId}`);
       console.log(`📋 [BASE64] Documento: ${printData.documentName}`);
-      console.log(`📊 [BASE64] Tamaño Base64: ${printData.documentBase64.length} caracteres`);
+      //console.log(`📊 [BASE64] Tamaño Base64: ${printData.documentBase64.length} caracteres`);
 
       // Buscar impresora
       const printer = await storage.getPrinter(printData.printerId);
